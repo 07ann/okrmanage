@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OKR 碎冰台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F4F8FB; --card:#FFFFFF; --ink:#142231; --muted:#5A6B7D; --faint:#8296AA;
+  --line:#DCE5EE; --line2:#EEF3F8; --accent:#2F7DB8; --accent-ink:#1F5C8C; --accent-soft:#DDEBF7; --accent-bg:#EEF5FB;
+  --ice:#E3F1FC; --warn:#C2620A; --warn-ink:#8A4A00; --warn-soft:#FCEBD3; --on-accent:#FFFFFF; --seg:#E6EDF4;
+  --serif:"Noto Serif SC","Songti SC",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1923; --card:#172431; --ink:#E3ECF4; --muted:#9AAEC0; --faint:#71879B;
+  --line:#2A3B4C; --line2:#213242; --accent:#6CB0E6; --accent-ink:#A9D2F3; --accent-soft:#1D3A55; --accent-bg:#18304A;
+  --ice:#1D3A55; --warn:#E9A75C; --warn-ink:#F2C38F; --warn-soft:#3A2A17; --on-accent:#0B1824; --seg:#213242; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1923; --card:#172431; --ink:#E3ECF4; --muted:#9AAEC0; --faint:#71879B;
+  --line:#2A3B4C; --line2:#213242; --accent:#6CB0E6; --accent-ink:#A9D2F3; --accent-soft:#1D3A55; --accent-bg:#18304A;
+  --ice:#1D3A55; --warn:#E9A75C; --warn-ink:#F2C38F; --warn-soft:#3A2A17; --on-accent:#0B1824; --seg:#213242; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{max-width:720px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* 顶栏 */
+.top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:calc(14px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;flex-direction:column;gap:12px}
+.toprow{display:flex;align-items:center;gap:10px}
+.brand{font-weight:700;font-size:17px;white-space:nowrap}
+.osel{flex:1;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:0 8px;font-size:14px}
+.newo{height:36px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:13px;white-space:nowrap}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steps button{border:none;background:none;padding:0;display:flex;flex-direction:column;gap:6px;text-align:left;font-size:12px;color:var(--muted)}
+.steps button i{height:4px;border-radius:2px;background:var(--line)}
+.steps button.done i{background:var(--accent)}
+.steps button.cur{color:var(--ink);font-weight:700}
+.steps button.cur i{background:var(--accent)}
+
+/* 主体 */
+main{flex:1;padding:18px 16px 120px;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:20px;font-weight:700}
+.sub{font-size:13px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.pad{padding:12px 14px}
+.row{display:flex;align-items:center;gap:8px}
+.sp{flex:1}
+.lab{font-size:12px;color:var(--muted)}
+.tag{font-size:11px;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.tag.solid{background:var(--accent);color:var(--on-accent)}
+.field{width:100%;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:0 10px;font-size:14px;min-width:0}
+.field.num{font-weight:700;font-size:15px}
+textarea.field{height:auto;padding:8px 10px;resize:none;line-height:1.5}
+.field.bad{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.grid3>label{display:flex;flex-direction:column;gap:4px;min-width:0}
+.x{width:32px;height:32px;border:none;background:none;color:var(--faint);font-size:18px;border-radius:8px;flex:none}
+.x:hover{color:var(--warn);background:var(--warn-soft)}
+.add{min-height:44px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--muted);font-size:14px;width:100%}
+.add:hover{border-color:var(--accent);color:var(--accent-ink)}
+.primary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border:none;border-radius:12px;background:var(--accent);color:var(--on-accent);font-size:16px;font-weight:700}
+.link{border:none;background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:6px 0;align-self:center}
+.link.danger:hover{color:var(--warn)}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.foot .in{max-width:688px;margin:0 auto}
+.warnbox{background:var(--warn-soft);color:var(--warn-ink);border-radius:10px;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:4px}
+
+/* 冰块：只用在主线 O */
+.ice{background:var(--ice);clip-path:polygon(3% 7%,28% 0,70% 4%,99% 1%,97% 52%,100% 97%,63% 100%,24% 96%,0 100%,2% 48%);padding:32px 24px 28px;display:flex;flex-direction:column;gap:8px}
+.ice .k{font-size:12px;letter-spacing:.12em;color:var(--accent-ink);font-weight:700}
+.ice textarea{border:none;background:transparent;resize:none;font-family:var(--serif);font-weight:700;font-size:22px;line-height:1.45;padding:0;outline:none;width:100%}
+.ice textarea::placeholder{color:var(--faint);font-weight:700}
+.hint{font-size:12px;color:var(--accent-ink);min-height:1.5em}
+.hint.warn{color:var(--warn)}
+.shake{animation:shake .34s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+
+/* 拆解 */
+.krs{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px}
+.krs button{min-height:36px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:13px;padding:4px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.krs button.on{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--seg);border-radius:10px;padding:3px}
+.seg button{height:38px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button small{font-size:11px;font-weight:400}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:700}
+.mini-seg{display:inline-grid;grid-template-columns:repeat(2,auto);border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:12px;flex:none}
+.mini-seg button{border:none;background:none;padding:3px 10px;color:var(--muted)}
+.mini-seg button.on{background:var(--ink);color:var(--bg)}
+.mini-seg button.drop.on{background:var(--warn);color:#fff}
+.anchor{background:var(--accent-bg);border-radius:12px 12px 0 0;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.step{padding:10px 14px;border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:6px}
+.step.dropped{opacity:.5}
+.step.dropped .sname{text-decoration:line-through}
+.idx{width:20px;height:20px;border-radius:50%;background:var(--line2);color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.step .field{height:34px;font-size:14px}
+.step input[type=date]{width:136px;flex:none}
+.memo{font-size:12px!important;height:30px!important;border-style:dashed!important;color:var(--muted)}
+.ask{padding:12px 14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.cfoot{padding:10px 14px;border-top:1px solid var(--line2);font-size:12px;color:var(--accent-ink);display:flex;align-items:center;gap:8px}
+
+/* 行动计划 */
+.act{padding:10px 14px;border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:8px}
+.dots{display:flex;flex-wrap:wrap;gap:3px}
+.dots i{width:6px;height:6px;border-radius:50%;border:1.2px solid #8CB8DD}
+.nodes{display:flex;flex-wrap:wrap;gap:8px 14px}
+.nodes span{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--accent-ink);min-width:36px}
+.nodes span i{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent)}
+.empty{padding:12px 14px;border-top:1px solid var(--line2);font-size:13px;color:var(--muted)}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(10,25,40,.4);z-index:50}
+.sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(720px,100%);max-height:90vh;overflow:auto;z-index:51;background:var(--card);border-radius:18px 18px 0 0;padding:0 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.sheet .sh{position:sticky;top:0;background:var(--card);display:flex;align-items:center;padding:14px 0 10px;border-bottom:1px solid var(--line)}
+.sheet .sh b{flex:1;font-size:17px}
+.sheet textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--ink);resize:vertical}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:40;max-width:min(92vw,480px);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+@media (min-width:760px){main{padding-top:24px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="toprow">
+      <span class="brand">OKR 碎冰台</span>
+      <select class="osel" id="osel" aria-label="切换目标"></select>
+      <button type="button" class="newo" data-act="newO">＋ 新目标</button>
+      <button type="button" class="newo" data-act="io" aria-label="导入或导出数据">导入</button>
+    </div>
+    <nav class="steps" id="steps" aria-label="步骤"></nav>
+  </header>
+  <main id="main"></main>
+</div>
+<div class="foot" id="foot"><div class="in" id="footIn"></div></div>
+
+<script>
+/* ================= 数据 =================
+   plan（存本机 okr-plan，之后同步到 Gist 的 plan.json）
+   objectives[{id,title,memo,start,end}]
+   krs[{id,oId,title,from,to,due}]
+   actions[{id,krId,name,type:'steps',steps[{id,name,date,memo,drop,end}]}
+          |{id,krId,name,type:'repeat',every:'day'|'week',times,impact,start,end}]
+   log（okr-log，登记页写）：checks[{id,actionId,stepId?,date}], reviews[...]
+*/
+const PK='okr-plan', LK='okr-log', UK='okr-ui';
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const today=()=>ymd(new Date());
+function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function daysIncl(a,b){if(!a||!b)return 0;const n=Math.round((parse(b)-parse(a))/864e5)+1;return n>0?n:0}
+function md(s){if(!s)return '—';const d=parse(s);return (d.getMonth()+1)+'/'+d.getDate()}
+function quarterEnd(){const d=new Date();const q=Math.floor(d.getMonth()/3);return ymd(new Date(d.getFullYear(),q*3+3,0))}
+
+let P=load(PK); if(!P||!Array.isArray(P.objectives))P={objectives:[],krs:[],actions:[]};
+let U=load(UK)||{}; U={o:null,stage:0,kr:null,m:'steps',...U};
+const save=()=>{P.updatedAt=new Date().toISOString();store(PK,P);store(UK,U)};
+
+function newO(){const o={id:uid(),title:'',memo:'',start:today(),end:quarterEnd()};P.objectives.push(o);U.o=o.id;U.stage=0;U.kr=null;return o}
+if(!P.objectives.length)newO();
+if(!P.objectives.find(o=>o.id===U.o))U.o=P.objectives[0].id;
+
+const O=()=>P.objectives.find(o=>o.id===U.o);
+const krsOf=oId=>P.krs.filter(k=>k.oId===oId);
+const actsOf=(krId,type)=>P.actions.filter(a=>a.krId===krId&&(!type||a.type===type));
+const archived=o=>o.end&&o.end<today();
+
+function repeatCount(a){const d=daysIncl(a.start,a.end);const t=Math.max(1,+a.times||1);if(!d)return 0;return a.every==='week'?Math.max(1,Math.round(d/7))*t:d*t}
+function liveSteps(a){return a.steps.filter(s=>!s.drop)}
+function circles(a){return a.type==='steps'?liveSteps(a).length:repeatCount(a)}
+
+/* 删除时连同打卡记录 */
+function checkCount(pred){const L=load(LK);return L&&Array.isArray(L.checks)?L.checks.filter(pred).length:0}
+function dropChecks(pred){const L=load(LK);if(L&&Array.isArray(L.checks)){L.checks=L.checks.filter(c=>!pred(c));store(LK,L)}}
+function confirmDel(what,pred){const n=checkCount(pred);return confirm(n?`删除${what}，它的 ${n} 条打卡记录也会一起删除。确定吗？`:`确定删除${what}吗？`)}
+
+/* ================= 提示规则（沿用旧版） ================= */
+function checkO(t){t=(t||'').trim();if(!t)return['warn','先写下这一季想到达的状态'];
+  if(/\d|[一二三四五六七八九十]+月/.test(t))return['warn','O 里有数字或月份，数字留给 KR'];
+  if(/^(完成|撰写|策划|制作|发布|投递|写|做|整理)/.test(t))return['warn','开头像任务，想想做完它想换来什么变化'];
+  return['','✓ 描述的是一个状态，可以敲碎了']}
+
+/* ================= 渲染 ================= */
+const LABELS=['主线 O','定 KR','拆解','行动计划'];
+function renderTop(){
+  const sel=document.getElementById('osel');
+  sel.innerHTML=P.objectives.map(o=>`<option value="${o.id}" ${o.id===U.o?'selected':''}>${esc(o.title.trim()||'未命名目标')}${archived(o)?'（已结束）':''}</option>`).join('');
+  document.getElementById('steps').innerHTML=LABELS.map((l,i)=>`<button type="button" data-goto="${i}" class="${i===U.stage?'cur':i<U.stage?'done':''}" ${i===U.stage?'aria-current="step"':''}><i></i>${l}</button>`).join('');
+}
+function render(){
+  renderTop();
+  const o=O();const V=[vO,vKR,vSplit,vPlan][U.stage];
+  document.getElementById('main').innerHTML=V(o);
+  document.getElementById('footIn').innerHTML=footFor(o);
+  document.querySelectorAll('textarea[data-auto]').forEach(autosize);
+  save();
+}
+function autosize(t){t.style.height='auto';t.style.height=t.scrollHeight+2+'px'}
+
+/* ① 主线 O */
+function vO(o){
+  const [c,m]=checkO(o.title);
+  return `<h1>写下这一季的主线目标</h1>
+  ${archived(o)?`<div class="warnbox">这个目标的周期已经结束，已自动归档：登记页不再显示它。想继续，把结束日期往后改。</div>`:''}
+  <div class="ice" id="oblock">
+    <span class="k">主线 O</span>
+    <textarea rows="2" data-auto data-o="title" placeholder="这个季度结束时，我希望什么变得不一样？" aria-label="主线目标">${esc(o.title)}</textarea>
+    <span class="hint ${c}" id="ohint">${esc(m)}</span>
+  </div>
+  <div class="card">
+    <div class="pad" style="display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line2)">
+      <div class="row"><span class="lab">周期</span><span class="sp"></span><span class="lab" id="odays">${daysIncl(o.start,o.end)?daysIncl(o.start,o.end)+' 天':'结束日期要晚于开始日期'}</span></div>
+      <div class="row"><input type="date" class="field" data-o="start" value="${esc(o.start)}" aria-label="开始日期"><span class="lab">→</span><input type="date" class="field" data-o="end" value="${esc(o.end)}" aria-label="结束日期"></div>
+    </div>
+    <div class="pad" style="display:flex;flex-direction:column;gap:6px">
+      <span class="lab">备注</span>
+      <textarea class="field" rows="2" data-auto data-o="memo" placeholder="为什么想做、有哪些约束……" aria-label="备注">${esc(o.memo)}</textarea>
+    </div>
+  </div>
+  ${P.objectives.length>1||o.title.trim()?`<button type="button" class="link danger" data-act="delO">删除这个目标</button>`:''}`;
+}
+
+/* ② 定 KR */
+function vKR(o){
+  const ks=krsOf(o.id);
+  return `<div style="display:flex;flex-direction:column;gap:2px"><span class="lab">主线 O</span><b style="font-size:16px">${esc(o.title||'未命名目标')}</b></div>
+  <div class="sub">每块 KR 是倒推的终点：要有数字，也要有截止日。</div>
+  ${ks.map((k,i)=>`<div class="card pad" style="display:flex;flex-direction:column;gap:10px" id="k-${k.id}">
+    <div class="row"><span class="tag">KR${i+1}</span><input class="field" data-k="${k.id}:title" value="${esc(k.title)}" placeholder="例如：公众号新增关注" aria-label="KR 名称"><button type="button" class="x" data-act="delKR" data-id="${k.id}" aria-label="删除这块 KR">×</button></div>
+    <div class="grid3">
+      <label><span class="lab">起点</span><input class="field num" inputmode="decimal" data-k="${k.id}:from" value="${esc(k.from)}"></label>
+      <label><span class="lab">目标</span><input class="field num" inputmode="decimal" data-k="${k.id}:to" value="${esc(k.to)}"></label>
+      <label><span class="lab">截止日</span><input type="date" class="field" data-k="${k.id}:due" value="${esc(k.due)}"></label>
+    </div></div>`).join('')}
+  <button type="button" class="add" data-act="addKR">＋ ${ks.length?'再加一块 KR':'加第一块 KR'}</button>`;
+}
+
+/* ③ 拆解 */
+function vSplit(o){
+  const ks=krsOf(o.id);
+  if(!ks.length)return `<h1>拆解</h1><div class="card pad sub">还没有 KR。先回到上一步定 KR。</div>`;
+  if(!ks.find(k=>k.id===U.kr))U.kr=ks[0].id;
+  const kr=ks.find(k=>k.id===U.kr),ki=ks.indexOf(kr);
+  const nS=actsOf(kr.id,'steps').length,nR=actsOf(kr.id,'repeat').length;
+  let h=`<div class="krs">${ks.map((k,i)=>`<button type="button" class="${k.id===kr.id?'on':''}" data-kr="${k.id}">KR${i+1} ${esc(k.title)}</button>`).join('')}</div>
+  <div class="seg">
+    <button type="button" class="${U.m==='steps'?'on':''}" data-m="steps">按时间倒推<small>${nS?'已填 '+nS:'未填'}</small></button>
+    <button type="button" class="${U.m==='repeat'?'on':''}" data-m="repeat">按维度倒推<small>${nR?'已填 '+nR:'未填'}</small></button>
+  </div>
+  <div class="sub" style="margin-top:-6px">两种可以只填一种，没填的不会出现在行动计划里。</div>`;
+  if(U.m==='steps'){
+    h+=actsOf(kr.id,'steps').map(a=>chainHTML(a)).join('');
+    h+=`<button type="button" class="add" data-act="addChain">＋ ${nS?'再倒推一条':'先定一个终点，开始倒推'}</button>`;
+  }else{
+    h+=`<div class="card" style="background:var(--accent-bg);border:none"><div class="pad" style="display:flex;flex-direction:column;gap:6px">
+      <div class="row"><span class="tag solid">终点</span><b>KR${ki+1} ${esc(kr.title||'')}</b><span class="sp"></span><span style="font-size:13px;color:var(--accent-ink)">${esc(kr.from)} → ${esc(kr.to)} · ${md(kr.due)}</span></div>
+      <span class="sub">要达到终点，需要从哪几个方向同时用力？</span></div></div>`;
+    h+=actsOf(kr.id,'repeat').map((a,i)=>dimHTML(a,i)).join('');
+    h+=`<button type="button" class="add" data-act="addDim">＋ ${nR?'再加一个任务':'加第一个任务'}</button>`;
+  }
+  return h;
+}
+function chainHTML(a){
+  const end=a.steps.find(s=>s.end), pre=a.steps.filter(s=>!s.end);
+  const first=pre[0]||end;
+  return `<div class="card" id="a-${a.id}">
+    <div class="anchor">
+      <div class="row"><span class="tag solid">终点</span><span class="sp"></span><button type="button" class="x" data-act="delAct" data-id="${a.id}" aria-label="删除这条倒推">×</button></div>
+      <div class="row"><input class="field" style="font-weight:700" data-s="${a.id}:${end.id}:name" value="${esc(end.name)}" placeholder="终点，例如：合作推文发布" aria-label="终点"><input type="date" class="field" style="width:136px;flex:none" data-s="${a.id}:${end.id}:date" value="${esc(end.date)}" aria-label="终点日期"></div>
+    </div>
+    <div class="ask">
+      <span class="sub">在「${esc((first.name||'终点').slice(0,16))}」之前，必须已经发生什么？</span>
+      <div class="row"><input class="field" id="new-${a.id}" placeholder="再往前一步" aria-label="新步骤"><input type="date" class="field" style="width:136px;flex:none" id="newd-${a.id}" aria-label="截止日期"><button type="button" class="newo" style="background:var(--ink);color:var(--bg);border-color:var(--ink)" data-act="addStep" data-id="${a.id}">加上</button></div>
+    </div>
+    ${pre.map((s,i)=>`<div class="step ${s.drop?'dropped':''}">
+      <div class="row"><span class="idx">${i+1}</span><input class="field sname" data-s="${a.id}:${s.id}:name" value="${esc(s.name)}" aria-label="步骤"><input type="date" class="field" data-s="${a.id}:${s.id}:date" value="${esc(s.date)}" aria-label="截止日期"></div>
+      <div class="row" style="padding-left:28px"><input class="field memo" data-s="${a.id}:${s.id}:memo" value="${esc(s.memo)}" placeholder="备忘：卡点、提醒……" aria-label="备忘"><span class="mini-seg"><button type="button" class="${s.drop?'':'on'}" data-drop="${a.id}:${s.id}:0">需要</button><button type="button" class="drop ${s.drop?'on':''}" data-drop="${a.id}:${s.id}:1">可删掉</button></span><button type="button" class="x" data-act="delStep" data-id="${a.id}:${s.id}" aria-label="删除步骤">×</button></div>
+    </div>`).join('')}
+    <div class="cfoot"><span>想一想：有没有非必要的步骤？</span><span class="sp"></span><b id="cnt-${a.id}">${circles(a)} 个圆</b></div>
+  </div>`;
+}
+function dimHTML(a,i){
+  return `<div class="card pad" style="display:flex;flex-direction:column;gap:10px" id="a-${a.id}">
+    <div class="row"><span class="tag">任务 ${i+1}</span><input class="field" style="font-weight:700" data-a="${a.id}:name" value="${esc(a.name)}" placeholder="例如：每天写 500 字" aria-label="任务名称"><button type="button" class="x" data-act="delAct" data-id="${a.id}" aria-label="删除这个任务">×</button></div>
+    <div class="grid3">
+      <label><span class="lab">过程值</span><span class="row" style="gap:4px"><select class="field" style="padding:0 4px" data-a="${a.id}:every" aria-label="频率"><option value="day" ${a.every==='day'?'selected':''}>每天</option><option value="week" ${a.every==='week'?'selected':''}>每周</option></select><input class="field num" style="width:44px;flex:none;padding:0 6px" inputmode="numeric" data-a="${a.id}:times" value="${esc(a.times)}" aria-label="次数"></span></label>
+      <label><span class="lab">影响值</span><input class="field num" inputmode="decimal" data-a="${a.id}:impact" value="${esc(a.impact)}" placeholder="+150"></label>
+      <label><span class="lab">完成周期</span><span class="lab" style="height:38px;display:flex;align-items:center;color:var(--ink);font-weight:700;font-size:13px" id="per-${a.id}">${md(a.start)} – ${md(a.end)}</span></label>
+    </div>
+    <div class="row"><input type="date" class="field" data-a="${a.id}:start" value="${esc(a.start)}" aria-label="开始日期"><span class="lab">→</span><input type="date" class="field" data-a="${a.id}:end" value="${esc(a.end)}" aria-label="结束日期"></div>
+    <span style="font-size:12px;color:var(--accent-ink)" id="cnt-${a.id}">→ 生成 ${circles(a)} 个圆</span>
+  </div>`;
+}
+
+/* ④ 行动计划 */
+function issuesOf(o){const out=[];
+  krsOf(o.id).forEach((k,i)=>{const as=actsOf(k.id);
+    if(!as.length)out.push(`KR${i+1} 还没有行动`);
+    as.forEach(a=>{
+      if(!(a.name||'').trim())out.push(`KR${i+1} 有一条行动没写名称`);
+      if(a.type==='steps'&&liveSteps(a).some(s=>!s.date))out.push(`KR${i+1}「${a.name||'未命名'}」有步骤没填截止时间`);
+      if(a.type==='repeat'&&!repeatCount(a))out.push(`KR${i+1}「${a.name||'未命名'}」的完成周期不对`);
+    })});return out}
+function vPlan(o){
+  const ks=krsOf(o.id),iss=issuesOf(o);
+  return `<div style="display:flex;flex-direction:column;gap:2px"><span class="lab">主线 O · ${md(o.start)} – ${md(o.end)}</span><b style="font-size:16px">${esc(o.title||'未命名目标')}</b></div>
+  ${iss.length?`<div class="warnbox"><b>还有 ${iss.length} 处没填完</b>${iss.slice(0,5).map(t=>`<span>· ${esc(t)}</span>`).join('')}</div>`:''}
+  ${ks.map((k,i)=>{const as=actsOf(k.id).filter(a=>(a.name||'').trim()&&circles(a));
+    return `<section class="card">
+      <div class="pad row"><span class="tag">KR${i+1}</span><b>${esc(k.title||'未命名')} ${esc(k.from)} → ${esc(k.to)}</b><span class="sp"></span><span class="lab">${as.length} 条行动</span></div>
+      ${as.length?as.map(actRow).join(''):`<div class="empty">还没有行动。<button type="button" class="link" style="padding:0" data-gokr="${k.id}">回去拆解</button></div>`}
+    </section>`}).join('')}
+  ${!ks.length?`<div class="card pad sub">还没有 KR。</div>`:''}`;
+}
+function actRow(a){
+  const n=circles(a);
+  if(a.type==='steps')return `<div class="act"><div class="row"><span>${esc(a.name)}</span><span class="sp"></span><span class="lab">${n} 次</span></div>
+    <div class="nodes">${liveSteps(a).map(s=>`<span title="${esc(s.name)}"><i></i>${md(s.date)}</span>`).join('')}</div></div>`;
+  const meta=`${n} 次${a.impact!==''&&a.impact!=null?' · +'+esc(String(a.impact).replace(/^\+/,'')):''}`;
+  return `<div class="act"><div class="row"><span>${esc(a.name)}</span><span class="sp"></span><span class="lab">${meta}</span></div>
+    ${n<=100?`<div class="dots">${'<i></i>'.repeat(n)}</div>`:`<span class="lab">超过 100 次，看板上按周显示</span>`}</div>`;
+}
+
+/* 底部按钮 */
+function footFor(o){
+  if(U.stage===0)return `<button type="button" class="primary" data-act="smash">敲碎它</button>`;
+  if(U.stage===1)return `<button type="button" class="primary" data-goto="2">逐块拆成行动</button>`;
+  if(U.stage===2)return `<button type="button" class="primary" data-goto="3">生成行动计划</button>`;
+  return `<button type="button" class="primary" data-act="sync">同步到登记，开始执行</button>`;
+}
+
+let tt;function toast(m){document.querySelector('.toast')?.remove();const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=m;document.body.appendChild(t);clearTimeout(tt);tt=setTimeout(()=>t.remove(),3200)}
+function shake(el){if(!el)return;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}
+function goto(i){U.stage=i;render();window.scrollTo({top:0})}
+
+/* ================= 交互 ================= */
+document.getElementById('osel').addEventListener('change',e=>{U.o=e.target.value;U.kr=null;U.stage=0;render()});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const d=b.dataset;const o=O();
+  if(d.goto!==undefined){goto(+d.goto);return}
+  if(d.kr){U.kr=d.kr;render();return}
+  if(d.m){U.m=d.m;render();return}
+  if(d.gokr){U.kr=d.gokr;U.stage=2;render();window.scrollTo({top:0});return}
+  if(d.drop){const [aid,sid,v]=d.drop.split(':');const a=P.actions.find(x=>x.id===aid);const s=a.steps.find(x=>x.id===sid);s.drop=v==='1';render();return}
+  switch(d.act){
+    case 'newO':newO();render();setTimeout(()=>document.querySelector('[data-o=title]')?.focus(),0);return;
+    case 'delO':{if(!confirmDel('这个目标（连同它的 KR 和行动）',c=>actIdsOfO(o.id).has(c.actionId)))return;
+      const ids=actIdsOfO(o.id);dropChecks(c=>ids.has(c.actionId));
+      const kIds=new Set(krsOf(o.id).map(k=>k.id));P.actions=P.actions.filter(a=>!kIds.has(a.krId));P.krs=P.krs.filter(k=>k.oId!==o.id);P.objectives=P.objectives.filter(x=>x.id!==o.id);
+      if(!P.objectives.length)newO();U.o=P.objectives[0].id;U.stage=0;U.kr=null;render();toast('已删除');return}
+    case 'smash':{const [c]=checkO(o.title);
+      if(c==='warn'||!daysIncl(o.start,o.end)){shake(document.getElementById('oblock'));toast(c==='warn'?checkO(o.title)[1]:'周期的结束日期要晚于开始日期');return}
+      if(!krsOf(o.id).length){P.krs.push({id:uid(),oId:o.id,title:'',from:0,to:'',due:o.end})}
+      goto(1);setTimeout(()=>document.querySelector('[data-k$=":title"]')?.focus(),0);return}
+    case 'addKR':{const k={id:uid(),oId:o.id,title:'',from:0,to:'',due:o.end};P.krs.push(k);render();document.querySelector(`[data-k="${k.id}:title"]`)?.focus();return}
+    case 'delKR':{const id=d.id;const aIds=new Set(actsOf(id).map(a=>a.id));if(!confirmDel('这块 KR（连同它的行动）',c=>aIds.has(c.actionId)))return;
+      dropChecks(c=>aIds.has(c.actionId));P.actions=P.actions.filter(a=>a.krId!==id);P.krs=P.krs.filter(k=>k.id!==id);if(U.kr===id)U.kr=null;render();return}
+    case 'addChain':{const kr=P.krs.find(k=>k.id===U.kr);const a={id:uid(),krId:kr.id,name:'',type:'steps',steps:[{id:uid(),name:'',date:kr.due||'',memo:'',drop:false,end:true}]};P.actions.push(a);render();document.querySelector(`[data-s^="${a.id}:"]`)?.focus();return}
+    case 'addDim':{const a={id:uid(),krId:U.kr,name:'',type:'repeat',every:'day',times:1,impact:'',start:o.start,end:o.end};P.actions.push(a);render();document.querySelector(`[data-a="${a.id}:name"]`)?.focus();return}
+    case 'delAct':{const id=d.id;if(!confirmDel('这条行动',c=>c.actionId===id))return;dropChecks(c=>c.actionId===id);P.actions=P.actions.filter(a=>a.id!==id);render();return}
+    case 'addStep':{const a=P.actions.find(x=>x.id===d.id);const t=document.getElementById('new-'+a.id),dt=document.getElementById('newd-'+a.id);
+      if(!t.value.trim()){shake(t);t.focus();return}
+      a.steps.unshift({id:uid(),name:t.value.trim(),date:dt.value||'',memo:'',drop:false});render();document.getElementById('new-'+a.id)?.focus();return}
+    case 'delStep':{const [aid,sid]=d.id.split(':');if(!confirmDel('这个步骤',c=>c.actionId===aid&&c.stepId===sid))return;
+      dropChecks(c=>c.actionId===aid&&c.stepId===sid);const a=P.actions.find(x=>x.id===aid);a.steps=a.steps.filter(s=>s.id!==sid);render();return}
+    case 'io':openIO();return;
+    case 'ioClose':closeIO();return;
+    case 'ioCopy':{const ta=document.getElementById('ioOut');ta.select();try{navigator.clipboard.writeText(ta.value).then(()=>toast('已复制'),()=>toast('请手动全选复制'))}catch(err){toast('请手动全选复制')}return}
+    case 'ioImport':doImport();return;
+    case 'sync':{const iss=issuesOf(o);if(iss.length){toast('还有 '+iss.length+' 处没填完：'+iss[0]);return}
+      P.syncedAt=new Date().toISOString();save();toast('已保存。登记页会直接读取这份行动计划');return}
+  }
+});
+/* ================= 导入 / 导出 ================= */
+function openIO(){
+  const out=JSON.stringify({source:'okr-plan',exportedAt:new Date().toISOString(),plan:P,log:load(LK)||{checks:[],reviews:[]}});
+  const bg=document.createElement('div');bg.className='sheet-bg';bg.id='iobg';bg.addEventListener('click',closeIO);
+  const sh=document.createElement('div');sh.className='sheet';sh.id='iosheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');sh.setAttribute('aria-label','导入与导出');
+  sh.innerHTML=`<div class="sh"><b>导入 / 导出</b><button type="button" class="x" data-act="ioClose" aria-label="关闭">×</button></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><b style="font-size:14px">导入</b>
+      <span class="sub">粘贴旧版碎冰台「导出数据」的内容，或新版导出的备份。导入的目标会作为新目标加进来，不会覆盖现有目标。</span>
+      <textarea id="ioIn" placeholder="在这里粘贴…" aria-label="要导入的数据"></textarea>
+      <button type="button" class="primary" style="min-height:46px;font-size:15px" data-act="ioImport">导入</button></div>
+    <div style="display:flex;flex-direction:column;gap:6px;padding-bottom:6px"><b style="font-size:14px">导出备份</b>
+      <span class="sub">当前所有目标、行动计划和打卡记录。</span>
+      <textarea id="ioOut" readonly aria-label="导出的数据">${esc(out)}</textarea>
+      <button type="button" class="newo" style="align-self:flex-start" data-act="ioCopy">复制</button></div>`;
+  document.body.append(bg,sh);setTimeout(()=>document.getElementById('ioIn')?.focus(),0);
+}
+function closeIO(){document.getElementById('iobg')?.remove();document.getElementById('iosheet')?.remove()}
+
+/* 旧版碎冰台（一棵树：O → KR → 行动 → 细分 → 每日）转成新版格式 */
+function convertOld(S){
+  const root=S.root;const o={id:uid(),title:(root.text||'').trim(),memo:(root.memo||'').trim(),start:'',end:''};
+  const krs=[],acts=[],checks=[];const all=[];
+  const leaves=n=>n.kids&&n.kids.length?n.kids.flatMap(leaves):[n];
+  (root.kids||[]).forEach(k=>{
+    const kr={id:uid(),oId:o.id,title:(k.text||'').trim(),from:'',to:'',due:''};krs.push(kr);
+    (k.kids||[]).forEach(a=>{
+      const ls=leaves(a).filter(l=>(l.text||'').trim());if(!ls.length)return;
+      const steps=ls.map(l=>({id:uid(),name:l.text.trim(),date:l.date||'',memo:[l.block?'卡点：'+l.block:'',l.deliv?'交付物：'+l.deliv:''].filter(Boolean).join('；'),drop:false,_p:l.prog||0}));
+      steps.sort((x,y)=>(x.date||'9999').localeCompare(y.date||'9999'));
+      steps[steps.length-1].end=true;
+      const act={id:uid(),krId:kr.id,name:(a.text||'').trim()||steps[steps.length-1].name,type:'steps',steps};
+      steps.forEach(s=>{if(s.date)all.push(s.date);if(s._p>=100)checks.push({id:uid(),actionId:act.id,stepId:s.id,date:s.date&&s.date<=today()?s.date:today(),src:'import'});delete s._p});
+      kr.due=steps.map(s=>s.date).filter(Boolean).sort().pop()||'';
+      acts.push(act);
+    });
+  });
+  all.sort();
+  o.start=all.length&&all[0]<today()?all[0]:today();
+  o.end=all.length&&all[all.length-1]>quarterEnd()?all[all.length-1]:quarterEnd();
+  krs.forEach(k=>{if(!k.due)k.due=o.end});
+  return {objectives:[o],krs,actions:acts,checks,reviews:[]};
+}
+function doImport(){
+  const raw=(document.getElementById('ioIn').value||'').trim();if(!raw){toast('先粘贴要导入的内容');return}
+  let j;try{j=JSON.parse(raw)}catch(e){toast('内容格式不对，请粘贴完整的导出内容');return}
+  let add;
+  if(j&&(j.source==='okr-shatter-v2'||(j.data&&j.data.root)||j.root)){const S=j.data||j;if(!S.root){toast('没有找到旧版目标');return}add=convertOld(S)}
+  else if(j&&(j.plan||j.objectives)){const p=j.plan||j,l=j.log||{};
+    const oIds=new Map((p.objectives||[]).map(x=>[x.id,uid()])),kIds=new Map((p.krs||[]).map(x=>[x.id,uid()])),aIds=new Map((p.actions||[]).map(x=>[x.id,uid()]));
+    add={objectives:(p.objectives||[]).map(x=>({...x,id:oIds.get(x.id)})),
+      krs:(p.krs||[]).filter(x=>oIds.has(x.oId)).map(x=>({...x,id:kIds.get(x.id),oId:oIds.get(x.oId)})),
+      actions:(p.actions||[]).filter(x=>kIds.has(x.krId)).map(x=>({...JSON.parse(JSON.stringify(x)),id:aIds.get(x.id),krId:kIds.get(x.krId)})),
+      checks:(l.checks||[]).filter(c=>aIds.has(c.actionId)).map(c=>({...c,id:uid(),actionId:aIds.get(c.actionId)})),
+      reviews:(l.reviews||[]).filter(r=>kIds.has(r.krId)).map(r=>({...r,id:uid(),krId:kIds.get(r.krId)}))};}
+  else{toast('认不出这份内容');return}
+  if(!add.objectives.length){toast('里面没有目标');return}
+  /* 新版里那个还没写任何东西的空目标，导入时顺手去掉 */
+  P.objectives=P.objectives.filter(x=>x.title.trim()||krsOf(x.id).length);
+  P.objectives.push(...add.objectives);P.krs.push(...add.krs);P.actions.push(...add.actions);
+  if(add.checks.length||add.reviews.length){const L=load(LK)||{};L.checks=(L.checks||[]).concat(add.checks);L.reviews=(L.reviews||[]).concat(add.reviews);store(LK,L)}
+  U.o=add.objectives[0].id;U.kr=null;U.stage=1;closeIO();render();window.scrollTo({top:0});
+  toast(`已导入：${add.krs.length} 块 KR、${add.actions.length} 条行动${add.checks.length?'、'+add.checks.length+' 条已完成记录':''}。请补上 KR 的起点和目标数字`);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeIO()});
+
+function actIdsOfO(oId){const kIds=new Set(krsOf(oId).map(k=>k.id));return new Set(P.actions.filter(a=>kIds.has(a.krId)).map(a=>a.id))}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id&&e.target.id.startsWith('new-')){e.preventDefault();document.querySelector(`[data-act=addStep][data-id="${e.target.id.slice(4)}"]`)?.click()}});
+
+document.addEventListener('input',e=>{
+  const t=e.target,d=t.dataset;const o=O();
+  if(t.matches('textarea[data-auto]'))autosize(t);
+  if(d.o){o[d.o]=t.value;
+    if(d.o==='title'){const [c,m]=checkO(t.value);const h=document.getElementById('ohint');h.className='hint '+c;h.textContent=m;renderTop()}
+    if(d.o==='start'||d.o==='end'){const n=daysIncl(o.start,o.end);document.getElementById('odays').textContent=n?n+' 天':'结束日期要晚于开始日期';renderTop()}
+    save();return}
+  if(d.k){const [id,f]=d.k.split(':');const k=P.krs.find(x=>x.id===id);k[f]=(f==='from'||f==='to')?t.value.trim():t.value;save();return}
+  if(d.a){const [id,f]=d.a.split(':');const a=P.actions.find(x=>x.id===id);a[f]=f==='times'?(parseInt(t.value)||''):t.value;
+    const c=document.getElementById('cnt-'+id);if(c)c.textContent='→ 生成 '+circles(a)+' 个圆';
+    const p=document.getElementById('per-'+id);if(p)p.textContent=md(a.start)+' – '+md(a.end);save();return}
+  if(d.s){const [aid,sid,f]=d.s.split(':');const a=P.actions.find(x=>x.id===aid);const s=a.steps.find(x=>x.id===sid);s[f]=t.value;if(s.end&&f==='name')a.name=t.value;save();return}
+});
+document.addEventListener('change',e=>{if(e.target.matches('select[data-a]')){const [id,f]=e.target.dataset.a.split(':');const a=P.actions.find(x=>x.id===id);a[f]=e.target.value;const c=document.getElementById('cnt-'+id);if(c)c.textContent='→ 生成 '+circles(a)+' 个圆';save()}});
+
+render();
+</script>
+</body>
+</html>
