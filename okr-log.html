@@ -44,7 +44,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{
 .app{max-width:640px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
 .top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top,0px)) 8px 12px;display:flex;flex-direction:column;gap:8px}
-.navrow{padding:0 8px 2px}
 .dater{display:flex;align-items:center;justify-content:space-between}
 .dater button.nav{width:44px;height:44px;border:none;background:none;font-size:24px;color:var(--accent);border-radius:10px}
 .dater button.nav:disabled{color:var(--line);cursor:default}
@@ -113,19 +112,94 @@ nav.tabs a.cur{color:var(--accent);font-weight:700;box-shadow:inset 0 3px 0 var(
 .conf button{height:34px;border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:12px;padding:0}
 .conf button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:60;max-width:min(92vw,480px);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;font-size:14px}
+
+/* 打卡 / 进度 切换 */
+.navrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 8px 2px}
+.vseg{display:inline-grid;grid-template-columns:repeat(2,auto);background:var(--seg);border-radius:9px;padding:3px;flex:none}
+.vseg button{border:none;background:none;min-height:32px;padding:0 14px;border-radius:6px;font-size:14px;color:var(--muted)}
+.vseg button.on{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* 进度视图 */
+.sp{flex:1}.pad{padding:12px 14px}.sub{font-size:12px;color:var(--muted)}
+.row2{display:flex;align-items:center;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips button.on{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:700}
+.krgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.krc{padding:12px 14px;gap:8px}
+.krc .kt{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;background:var(--accent-soft);color:var(--accent-ink)}
+.st.warn{background:var(--warn-soft);color:var(--warn-ink)}
+.st.bad{background:var(--warn);color:var(--on-accent)}
+.st.na{background:var(--line2);color:var(--muted)}
+.kv b{font-size:24px}.kv span{color:var(--muted);font-size:13px}
+.kbar{position:relative;height:8px;background:var(--line2);border-radius:4px}
+.kbar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.kbar em{position:absolute;top:-4px;width:2px;height:16px;background:var(--ink);margin-left:-1px}
+.kfoot{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);gap:8px}
+.arow{padding:12px 14px;border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:8px}
+.arow:first-child{border-top:none}
+.arow .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.arow .meta,.rv .meta{font-size:11px;color:var(--muted)}
+.iv{display:flex;flex-direction:column;align-items:flex-end;flex:none}
+.iv b{font-size:20px}.iv small{font-size:11px;color:var(--muted)}
+.iv.ok b{color:var(--accent)}.iv.warn b{color:var(--warn)}
+.pdots{display:flex;flex-wrap:wrap;gap:4px}
+.pdots i,.pleg i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ring)}
+.pdots i.d,.pleg i.d{background:var(--accent);border-color:var(--accent)}
+.pdots i.m,.pleg i.m{border:2px solid var(--warn)}
+.pweeks{display:flex;flex-wrap:wrap;gap:3px}
+.pweeks i{width:14px;height:14px;border-radius:3px}
+.pweeks i.fut{background:none;box-shadow:inset 0 0 0 1px var(--line)}
+.pleg{display:flex;flex-wrap:wrap;gap:12px;padding:10px 14px;border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+.pleg span{display:flex;align-items:center;gap:5px}
+.h0{background:var(--line2)}.h1{background:color-mix(in srgb,var(--accent) 25%,var(--card))}.h2{background:color-mix(in srgb,var(--accent) 50%,var(--card))}.h3{background:color-mix(in srgb,var(--accent) 75%,var(--card))}.h4{background:var(--accent)}
+.hgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.hgrid.head{margin-bottom:5px}
+.hgrid.head span{font-size:11px;color:var(--muted);text-align:center}
+.hc{aspect-ratio:1/1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink)}
+.hc.h3,.hc.h4{color:var(--on-accent)}
+.hc.empty{background:none}
+.hc.fut{background:none;box-shadow:inset 0 0 0 1px var(--line);color:var(--faint)}
+.hc.today{outline:2px solid var(--ink);outline-offset:1px}
+.hleg{display:flex;align-items:center;gap:4px;margin-top:10px;font-size:11px;color:var(--muted)}
+.hleg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.mnav{width:36px;height:36px;border:none;background:none;font-size:20px;color:var(--accent);border-radius:8px}
+.mnav:disabled{color:var(--line);cursor:default}
+.mlab{font-size:13px;white-space:nowrap}
+.fold{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.fold summary{padding:12px 14px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"›";color:var(--muted);font-size:18px;transition:transform .15s}
+.fold[open] summary::after{transform:rotate(90deg)}
+.fbody{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
+.tbox{display:flex;flex-direction:column;gap:6px}
+.tsvg{width:100%;height:auto;display:block;max-width:560px}
+.tsvg .tgt{stroke:var(--ink);stroke-width:1;stroke-dasharray:2 3}
+.tsvg .ideal{stroke:var(--faint);stroke-width:1.5;stroke-dasharray:5 4}
+.tsvg .now{stroke:var(--ink);stroke-width:1}
+.tsvg .act{fill:none;stroke:var(--accent);stroke-width:2.5}
+.tsvg .pt{fill:var(--accent)}
+.tsvg .tl{font-size:10px;fill:var(--muted)}
+.tleg{display:flex;gap:12px;font-size:11px;color:var(--muted)}
+.lg{display:inline-block;width:14px;border-top:2px solid;vertical-align:middle;margin-right:4px}
+.lg.act{border-color:var(--accent)}.lg.ideal{border-color:var(--faint);border-top-style:dashed}.lg.now{width:0;height:10px;border-top:none;border-left:2px solid var(--ink)}
+.rv{display:flex;flex-direction:column;gap:2px;padding-bottom:10px;border-bottom:1px solid var(--line2);font-size:14px}
+.ctab{width:100%;border-collapse:collapse;font-size:13px}
+.ctab th,.ctab td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line2)}
+.ctab th{font-size:12px;color:var(--muted);font-weight:500}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div class="navrow"><details class="appnav"><summary aria-label="切换工具，当前：登记">登记</summary><div class="appmenu"><a href="okr-shatter.html"><b>OKR 碎冰台</b><span>把目标拆成行动计划</span></a><a href="okr-log.html" aria-current="page"><b>登记</b><span>每天打卡、看进度</span></a><a href="index.html"><b>看板</b><span>个人工作看板</span></a></div></details></div>
-    <div class="dater">
+    <div class="navrow"><details class="appnav"><summary aria-label="切换工具，当前：登记">登记</summary><div class="appmenu"><a href="okr-shatter.html"><b>OKR 碎冰台</b><span>把目标拆成行动计划</span></a><a href="okr-log.html" aria-current="page"><b>登记</b><span>每天打卡、看进度</span></a><a href="index.html"><b>看板</b><span>个人工作看板</span></a></div></details><div class="vseg" role="group" aria-label="视图"><button type="button" data-view="log" class="on" aria-pressed="true">打卡</button><button type="button" data-view="prog" aria-pressed="false">进度</button></div></div>
+    <div class="dater" id="dater">
       <button type="button" class="nav" data-act="prev" aria-label="前一天">‹</button>
       <div class="dt"><b id="dtTitle"></b><span id="dtPill"></span></div>
       <button type="button" class="nav" data-act="next" aria-label="后一天" id="nextBtn">›</button>
     </div>
     <div class="hintline" id="hintline">切到前几天点圆，记在那一天</div>
-    <div class="prog"><div class="bar"><i id="pbar" style="width:0"></i></div><span id="ptext"></span></div>
+    <div class="prog" id="progrow"><div class="bar"><i id="pbar" style="width:0"></i></div><span id="ptext"></span></div>
   </header>
   <main id="main"></main>
 </div>
@@ -201,7 +275,115 @@ function dayChecks(aid,date){return L.checks.filter(c=>c.actionId===aid&&!c.step
 function weekChecks(aid,date){const ws=weekStart(date),we=addDays(ws,6);return L.checks.filter(c=>c.actionId===aid&&!c.stepId&&c.date>=ws&&c.date<=we)}
 
 /* ================= 渲染 ================= */
+/* ================= 进度视图（监控） ================= */
+let V=location.hash==='#progress'?'prog':'log',PO=null,HK='all',HM=null;
+function setView(v){V=v;try{history.replaceState(null,'',v==='prog'?'#progress':location.pathname+location.search)}catch(e){}
+  document.querySelectorAll('.vseg button').forEach(b=>{const on=b.dataset.view===v;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+  ['dater','hintline','progrow'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=v==='prog'});
+  render();window.scrollTo({top:0})}
+function elapsedFrac(a,b){const tot=daysIncl(a,b);if(!tot)return 0;const t=today();if(t<a)return 0;return Math.min(tot,daysIncl(a,t))/tot}
+function expectedOf(a,o){
+  const t=today();
+  if(a.type==='steps'){const live=a.steps.filter(x=>!x.drop&&(x.name||'').trim());const und=live.filter(x=>!x.date).length;
+    return live.filter(x=>x.date&&x.date<=t).length+Math.round(und*elapsedFrac(o.start,o.end))}
+  if(!a.start||!a.end)return 0;return Math.round(planned(a)*elapsedFrac(a.start,a.end));
+}
+function reviewsOf(krId){return L.reviews.filter(r=>r.krId===krId&&r.value!=null).sort((x,y)=>x.date.localeCompare(y.date))}
+function krStatus(k,o){
+  const rs=reviewsOf(k.id),last=rs[rs.length-1],prev=rs[rs.length-2];
+  const tp=elapsedFrac(o.start,k.due||o.end),from=+k.from||0,to=+k.to;
+  const conf=last?last.confidence:null;
+  const trend=last&&prev&&last.confidence!=null&&prev.confidence!=null?(last.confidence>prev.confidence?'↑':last.confidence<prev.confidence?'↓':'→'):'';
+  if(!last||!isFinite(to)||to===from||k.to===''||k.to==null)return {last,tp,pct:null,label:last?'目标未填':'未填现值',cls:'na',conf,trend};
+  const pct=Math.max(0,Math.min(1,(last.value-from)/(to-from)));
+  let label,cls;
+  if(pct>=tp+0.1){label='超前';cls='ok'}else if(pct>=tp){label='正常';cls='ok'}else if(tp-pct<=0.2){label='有风险';cls='warn'}else{label='偏离';cls='bad'}
+  if(cls==='ok'&&conf!=null&&conf<=4){label='有风险';cls='warn'}
+  return {last,tp,pct,label,cls,conf,trend};
+}
+function verdict(p){return p==null?['—','']:p>=100?['超前','ok']:p>=80?['接近','']:['落后','warn']}
+function dotsOf(a,o){
+  const n=planned(a),d=Math.min(doneAll(a),n),e=Math.min(expectedOf(a,o),n);
+  if(n<=100){let h='';for(let i=0;i<n;i++)h+=`<i class="${i<d?'d':i<e?'m':''}"></i>`;return `<div class="pdots">${h}</div>`}
+  /* 超过 100 次：按周显示，颜色越深这周完成越多 */
+  const ws0=weekStart(a.start),weeks=[];for(let w=ws0;w<=a.end;w=addDays(w,7))weeks.push(w);
+  const perWeek=a.every==='week'?Math.max(1,+a.times||1):7*Math.max(1,+a.times||1);
+  return `<div class="pweeks">${weeks.map(w=>{const c=L.checks.filter(x=>x.actionId===a.id&&!x.stepId&&x.date>=w&&x.date<=addDays(w,6)).length;const lv=c?Math.min(4,Math.ceil(c/perWeek*4)):0;
+    return `<i class="h${lv}${w>today()?' fut':''}" title="${md(w)} 起这周：${c} 次"></i>`}).join('')}</div>`;
+}
+function heatHTML(o,krs,acts){
+  const t=today();if(!HM)HM=t.slice(0,7);
+  const [y,m]=HM.split('-').map(Number);const first=new Date(y,m-1,1),days=new Date(y,m,0).getDate(),lead=(first.getDay()+6)%7;
+  const scope=new Set(acts.filter(a=>HK==='all'||a.krId===HK).map(a=>a.id));
+  const cnt={};L.checks.forEach(c=>{if(scope.has(c.actionId))cnt[c.date]=(cnt[c.date]||0)+1});
+  const max=Math.max(3,...Object.values(cnt));
+  let cells='';for(let i=0;i<lead;i++)cells+='<span class="hc empty"></span>';
+  for(let d=1;d<=days;d++){const k=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');const c=cnt[k]||0;const lv=c?Math.min(4,Math.ceil(c/max*4)):0;
+    cells+=`<span class="hc h${lv}${k===t?' today':''}${k>t?' fut':''}" title="${md(k)}：${c} 次">${d}</span>`}
+  return `<section><div class="row2"><h2>打卡热力</h2><span class="sp"></span>
+    <button type="button" class="mnav" data-hm="-1" aria-label="上个月">‹</button><b class="mlab">${y} 年 ${m} 月</b><button type="button" class="mnav" data-hm="1" aria-label="下个月" ${HM>=t.slice(0,7)?'disabled':''}>›</button></div>
+    <div class="chips"><button type="button" class="${HK==='all'?'on':''}" data-hk="all">汇总</button>${krs.map((k,i)=>`<button type="button" class="${HK===k.id?'on':''}" data-hk="${k.id}">KR${i+1}</button>`).join('')}</div>
+    <div class="card pad"><div class="hgrid head">${'一二三四五六日'.split('').map(x=>`<span>${x}</span>`).join('')}</div><div class="hgrid">${cells}</div>
+    <div class="hleg"><span>少</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>多</span></div></div></section>`;
+}
+function trendSVG(k,o){
+  const rs=reviewsOf(k.id),from=+k.from||0,to=+k.to,s=o.start,e=k.due||o.end;
+  if(!isFinite(to)||k.to===''||!daysIncl(s,e))return '<div class="sub">补上 KR 的目标数字后显示走势。</div>';
+  const W=320,H=140,px=24,py=14,tot=daysIncl(s,e)-1||1,lo=Math.min(from,to,...rs.map(r=>r.value)),hi=Math.max(from,to,...rs.map(r=>r.value)),span=hi-lo||1;
+  const X=d=>px+(W-2*px)*Math.max(0,Math.min(1,diffDays(s,d)/tot)),Y=v=>H-py-(H-2*py)*(v-lo)/span;
+  const pts=rs.map(r=>[X(r.date),Y(r.value)]);const tx=X(today());
+  return `<svg viewBox="0 0 ${W} ${H}" class="tsvg" role="img" aria-label="${esc(k.title)}走势：目标 ${esc(k.to)}，最新 ${rs.length?rs[rs.length-1].value:'未填'}">
+    <line x1="${px}" y1="${Y(to)}" x2="${W-px}" y2="${Y(to)}" class="tgt"/><text x="${W-px}" y="${Y(to)-4}" text-anchor="end" class="tl">目标 ${esc(k.to)}</text>
+    <line x1="${X(s)}" y1="${Y(from)}" x2="${X(e)}" y2="${Y(to)}" class="ideal"/>
+    ${today()>=s&&today()<=e?`<line x1="${tx}" y1="${py-4}" x2="${tx}" y2="${H-py+4}" class="now"/>`:''}
+    ${pts.length>1?`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" class="act"/>`:''}
+    ${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" class="pt"/>`).join('')}
+    <text x="${px}" y="${H-2}" class="tl">${md(s)}</text><text x="${W-px}" y="${H-2}" text-anchor="end" class="tl">${md(e)}</text></svg>
+    <div class="tleg"><span><i class="lg act"></i>实际</span><span><i class="lg ideal"></i>理想轨迹</span><span><i class="lg now"></i>今天</span></div>`;
+}
+function renderProgress(){
+  const main=document.getElementById('main'),os=activeOs();
+  if(!os.length){main.innerHTML=`<div class="blank"><span>还没有进行中的目标。</span><a href="okr-shatter.html">去碎冰台 →</a></div>`;return}
+  if(!os.find(o=>o.id===PO))PO=os[0].id;const o=os.find(x=>x.id===PO);
+  const krs=P.krs.filter(k=>k.oId===o.id);const kIdx=new Map(krs.map((k,i)=>[k.id,i+1]));
+  const acts=P.actions.filter(a=>kIdx.has(a.krId)&&(a.name||'').trim()&&planned(a));
+  if(HK!=='all'&&!kIdx.has(HK))HK='all';
+  const tot=daysIncl(o.start,o.end),el=Math.round(elapsedFrac(o.start,o.end)*tot);
+  let h=os.length>1?`<div class="chips">${os.map(x=>`<button type="button" class="${x.id===o.id?'on':''}" data-po="${x.id}">${esc(x.title||'未命名目标')}</button>`).join('')}</div>`:'';
+  h+=`<div class="oh"><span>目标 · ${md(o.start)} – ${md(o.end)}</span><b>${esc(o.title||'未命名目标')}</b>
+    <div class="oprog"><div class="bar"><i style="width:${tot?Math.round(el/tot*100):0}%;background:var(--ink)"></i></div><span>第 ${el} / ${tot} 天 · 时间已过 ${tot?Math.round(el/tot*100):0}%</span></div></div>`;
+  /* KR 总览 */
+  h+=`<section><h2>KR 总览</h2><div class="krgrid">${krs.map((k,i)=>{const s=krStatus(k,o);
+    return `<div class="card krc"><div class="row2"><span class="tag">KR${i+1}</span><b class="kt">${esc(k.title||'未命名')}</b><span class="st ${s.cls}">${s.label}</span></div>
+      <div class="kv"><b>${s.last?s.last.value:'—'}</b><span> / ${esc(k.to===''?'—':k.to)}</span></div>
+      <div class="kbar"><i style="width:${s.pct==null?0:Math.round(s.pct*100)}%"></i><em style="left:${Math.round(s.tp*100)}%"></em></div>
+      <div class="kfoot"><span>${s.pct==null?'在周回顾里填现值':'完成 '+Math.round(s.pct*100)+'% · 应到 '+Math.round(s.tp*100)+'%'}</span><span>${s.conf!=null?'信心 '+s.conf+' '+s.trend:''}</span></div></div>`}).join('')||'<div class="sub">还没有 KR。</div>'}</div></section>`;
+  /* 行动执行 */
+  h+=`<section><h2>行动执行</h2><div class="card">${acts.map(a=>{const d=Math.min(doneAll(a),planned(a)),e=expectedOf(a,o),p=e?Math.round(d/e*100):null,[vt,vc]=verdict(p);
+    return `<div class="arow"><div class="row2"><span class="t"><span class="meta">KR${kIdx.get(a.krId)} · ${a.type==='steps'?'关键节点':a.every==='week'?'每周 '+(a.times||1)+' 次':'每天'}</span><b>${esc(a.name)}</b></span>
+      <span class="iv ${vc}"><b>${p==null?'—':p+'%'}</b><small>强度 · ${vt}</small></span></div>${dotsOf(a,o)}
+      <span class="meta">完成 ${d} / 计划 ${planned(a)} · 按时间应完成 ${e}</span></div>`}).join('')||'<div class="empty">还没有行动。</div>'}
+    <div class="pleg"><span><i class="d"></i>已完成</span><span><i class="m"></i>该完成还差的</span><span><i></i>剩余计划</span></div></div></section>`;
+  /* 热力 */
+  h+=heatHTML(o,krs,acts);
+  /* 折叠区 */
+  h+=`<details class="fold"><summary>指标走势</summary><div class="fbody">${krs.map((k,i)=>`<div class="tbox"><b>KR${i+1} ${esc(k.title||'')}</b>${trendSVG(k,o)}</div>`).join('')}</div></details>`;
+  const revs=L.reviews.filter(r=>kIdx.has(r.krId)).sort((x,y)=>y.date.localeCompare(x.date));
+  h+=`<details class="fold"><summary>信心与周记</summary><div class="fbody">${revs.length?revs.map(r=>`<div class="rv"><span class="meta">${md(weekStart(r.date))} 这周 · KR${kIdx.get(r.krId)}${r.value!=null?' · 现值 '+r.value:''}${r.confidence!=null?' · 信心 '+r.confidence:''}</span><span>${esc(r.note||'（没写周记）')}</span></div>`).join(''):'<div class="sub">还没有周回顾。在「打卡」页底部填写。</div>'}</div></details>`;
+  /* 行动与指标关联：每周打卡次数 vs 指标变化 */
+  const weeks=[];for(let w=weekStart(o.start);w<=today();w=addDays(w,7))weeks.push(w);
+  const recent=weeks.slice(-8);
+  h+=`<details class="fold"><summary>行动与指标关联</summary><div class="fbody">${krs.map((k,i)=>{const ids=new Set(acts.filter(a=>a.krId===k.id).map(a=>a.id));const rs=reviewsOf(k.id);
+      const valAt=w=>{const r=rs.filter(x=>x.date<=addDays(w,6)).pop();return r?r.value:null};
+      return `<div class="tbox"><b>KR${i+1} ${esc(k.title||'')}</b><table class="ctab"><thead><tr><th>周</th><th>打卡次数</th><th>指标变化</th></tr></thead><tbody>${recent.map((w,j)=>{const c=L.checks.filter(x=>ids.has(x.actionId)&&x.date>=w&&x.date<=addDays(w,6)).length;
+        const v=valAt(w),pv=j?valAt(recent[j-1]):(+k.from||0);const dv=v!=null&&pv!=null?v-pv:null;
+        return `<tr><td>${md(w)} 起</td><td>${c}</td><td>${dv==null?'—':(dv>0?'+':'')+Math.round(dv*100)/100}</td></tr>`}).join('')}</tbody></table></div>`}).join('')}
+    <div class="sub">打卡多的那周指标也涨，说明行动有效；打卡多指标不动，就要考虑换行动。</div></div></details>`;
+  main.innerHTML=h;
+}
+
 function render(){
+  if(V==='prog'){renderProgress();return}
   const t=today(),isToday=D===t;
   document.getElementById('dtTitle').textContent=`${parse(D).getMonth()+1}月${parse(D).getDate()}日 周${WK[parse(D).getDay()]}`;
   document.getElementById('dtPill').innerHTML=isToday?'<span class="pill">今天</span>':`<button type="button" class="pill back" data-act="today">回到今天</button>`;
@@ -242,7 +424,11 @@ function render(){
           <span class="dots"><button type="button" class="dot ${ck?'on':''}" data-step="${a.id}:${s.id}" aria-label="${esc(s.name)}${ck?'，已完成':''}" aria-pressed="${!!ck}"><i></i></button></span></div>`}).join('')}</div></section>`;
     }
   });
-  if(!h)h=`<div class="blank"><span>${D===t?'今天':'这一天'}没有要打卡的行动。</span></div>`;
+  if(!h){
+    const later=P.actions.filter(a=>a.type==='repeat'&&a.start&&a.start>D&&os.some(o=>P.krs.some(k=>k.oId===o.id&&k.id===a.krId))).map(a=>a.start).sort()[0];
+    h=later?`<div class="blank"><span>这一天还在行动周期开始之前（从 ${md(later)} 开始），所以没有可以打卡的。</span><span>要补打这几天，去碎冰台把目标周期的开始日期往前改。</span><a href="okr-shatter.html">去碎冰台 →</a></div>`
+      :`<div class="blank"><span>${D===t?'今天':'这一天'}没有要打卡的行动。</span></div>`;
+  }
 
   // 周回顾入口
   const ws=weekStart(D);const rKrs=os.flatMap(o=>P.krs.filter(k=>k.oId===o.id));
@@ -314,6 +500,10 @@ let tt;function toast(m){document.querySelector('.toast')?.remove();const t=docu
 
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(d.view){setView(d.view);return}
+  if(d.po){PO=d.po;HK='all';render();return}
+  if(d.hk){HK=d.hk;render();return}
+  if(d.hm){const [y,m]=HM.split('-').map(Number);const nd=new Date(y,m-1+(+d.hm),1);HM=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');render();return}
   if(d.rep){toggleRep(d.rep,+d.i);return}
   if(d.step){const [a,s]=d.step.split(':');toggleStep(a,s);return}
   if(d.cf!==undefined){b.parentElement.querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});return}
@@ -330,7 +520,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview()});
 /* 另一个页面（碎冰台）改了计划，回到这里时刷新 */
 window.addEventListener('storage',e=>{if(e.key===PK)P=load(PK)||P;if(e.key===LK)L=load(LK)||L;render()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){P=load(PK)||P;const t=today();if(D>t)D=t;render()}});
-render();
+setView(V);
 </script>
 </body>
 </html>
