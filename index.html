@@ -308,15 +308,9 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 /* 项目卡 */
 .col.projects { background: var(--card); }
 .proj { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; background: var(--surface); min-width: 0; position: relative; }
+.ftime { display: grid; gap: 4px; }
+.ftime .unit { font-size: 12px; color: var(--muted); }
 .proj.over { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.ptime { display: grid; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-.ptime .trow { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.ptime .lab { font-size: 12px; color: var(--muted); flex: none; width: 28px; }
-.ptime .num { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.ptime .apples { overflow: hidden; }
-.pt-note { font-size: 12px; color: var(--muted); }
-.capples { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-.capples .unit { color: var(--muted); }
 .proj.drop-before { box-shadow: 0 -3px 0 var(--accent); }
 .proj.drop-after { box-shadow: 0 3px 0 var(--accent); }
 .proj-top { display: flex; gap: 10px; align-items: center; }
@@ -575,6 +569,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
     </div>
     <div class="row2">
       <label class="field"><span>所属项目</span><select id="fProj"></select></label>
+      <div class="field" id="fTimeWrap" hidden><span>用时</span><div id="fTime" class="ftime"></div></div>
     </div>
     <label class="field"><span>所在列</span>
       <select id="fCol">
@@ -1452,9 +1447,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       age = h('span', { class: 'age', text: mdays + ' 天' });
     }
     m.appendChild(age); d.appendChild(m);
-    var earnedAll = totalMin(c.sessions) / FOCUS_MIN;
-    if (c.col !== 'done' || earnedAll) d.appendChild(h('div', { class: 'capples', title: '和日待办同一份记录：计划 ' + c.est + ' 个，实际 ' + (Math.round(earnedAll * 10) / 10) + ' 个' }, [
-      appleRow(c.est, earnedAll, { cap: 8, label: c.title + '：' }), h('span', { class: 'unit', text: (Math.round(earnedAll * 10) / 10) + '/' + c.est })]));
     if (extra) d.appendChild(extra);
     var mv = h('div', { class: 'move' }), i = ORDER.indexOf(c.col);
     if (i > 0) mv.appendChild(h('button', { type: 'button', text: '‹ ' + COLS[i - 1].name, onclick: function () { moveCard(c.id, ORDER[i - 1]); } }));
@@ -1476,14 +1468,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     var sub = { id: uid(), title: c.title, done: c.col === 'done', cardId: c.id };
     p.subs.push(sub); c.projectId = p.id; c.subId = sub.id; touch(c);
     return true;
-  }
-  function projTime(p) {
-    var linked = state.cards.filter(function (c) { return c.projectId === p.id; });
-    var plan = linked.reduce(function (a, c) { return a + (c.est || 0); }, 0);
-    var mins = linked.reduce(function (a, c) { return a + totalMin(c.sessions); }, 0);
-    var todayS = ymd(Date.now()), todayMin = linked.reduce(function (a, c) { return a + totalMin(sessionsOn(c, todayS)); }, 0);
-    var ws = weekStart(0).getTime(), weekMin = linked.reduce(function (a, c) { return a + totalMin(c.sessions.filter(function (x) { return x.ts >= ws; })); }, 0);
-    return { plan: plan, earned: mins / FOCUS_MIN, mins: mins, todayMin: todayMin, weekMin: weekMin, n: linked.length };
   }
   function projectEl(p) {
     var pr = progress(p);
@@ -1527,12 +1511,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       subl.appendChild(row);
     });
 
-    var pt = projTime(p);
-    var timeRow = pt.n ? h('div', { class: 'ptime' }, [
-      h('div', { class: 'trow' }, [h('span', { class: 'lab', text: '计划' }), appleRow(pt.plan, 0, { cap: 10, label: '计划时长：' }), h('span', { class: 'num', text: pt.plan + ' 个 · ' + fmtMin(pt.plan * FOCUS_MIN) })]),
-      h('div', { class: 'trow' }, [h('span', { class: 'lab', text: '实际' }), appleRow(0, pt.earned, { cap: 10, label: '实际时长：' }), h('span', { class: 'num', text: (Math.round(pt.earned * 10) / 10) + ' 个 · ' + fmtMin(pt.mins) })]),
-      (pt.todayMin || pt.weekMin) ? h('div', { class: 'pt-note', text: '今天 ' + fmtMin(pt.todayMin) + ' · 本周 ' + fmtMin(pt.weekMin) }) : null
-    ]) : null;
     var el = h('div', { class: 'proj' }, [
       h('div', { class: 'proj-top' }, [h('span', { class: 'grip', title: '拖动排序', text: '⋮⋮' }), rb, h('div', { class: 'proj-name' }, [
         h('button', { type: 'button', class: 't', text: p.name, title: p.okr ? '去 OKR 登记' : null, onclick: function () { if (p.okr) location.href = 'okr-log.html'; else openProject(p.id); } }),
@@ -1540,7 +1518,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
           h('span', { class: 'chip' + (pr.total && pr.done === pr.total ? ' ok' : ''), text: pr.total ? pr.unit + ' ' + pr.done + '/' + pr.total : '还没有子项目' })])
       ])]),
       p.subs.length ? seg : null,
-      timeRow,
       p.subs.length ? subl : null,
       h('div', { class: 'proj-foot' }, [
         p.subs.length > 8 ? h('span', { text: '还有 ' + (p.subs.length - 8) + ' 项' }) : null,
@@ -2051,6 +2028,13 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function openCard(id) {
     editing = id || null;
     var c = id ? find(id) : null;
+    var tw = $('fTimeWrap'), tb = $('fTime'); tb.textContent = '';
+    if (c) {
+      var mins = totalMin(c.sessions), earned = mins / FOCUS_MIN;
+      tb.appendChild(appleRow(c.est, earned, { cap: 12, label: c.title + '：' }));
+      tb.appendChild(h('span', { class: 'unit', text: '计划 ' + c.est + ' 个 · 实际 ' + (Math.round(earned * 10) / 10) + ' 个（' + fmtMin(mins) + '）· 启动 ' + c.sessions.length + ' 次' }));
+      tw.hidden = false;
+    } else tw.hidden = true;
     $('cardTitle').textContent = c ? '编辑任务' : '新建任务';
     $('fTitle').value = c ? c.title : '';
     var cat = c ? c.cat : (state.filter !== 'all' ? state.filter : '工作');
