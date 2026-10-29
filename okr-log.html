@@ -47,6 +47,9 @@ main{flex:1;padding:16px 16px 100px;display:flex;flex-direction:column;gap:18px}
 .oh{display:flex;flex-direction:column;gap:2px}
 .oh span{font-size:12px;color:var(--muted)}
 .oh b{font-size:16px}
+.oprog{display:flex;align-items:center;gap:10px;margin-top:4px}
+.oprog .bar{height:6px}
+.oprog span{font-size:12px;color:var(--muted);white-space:nowrap}
 section{display:flex;flex-direction:column;gap:8px}
 section>h2{margin:0;font-size:14px;font-weight:700}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column}
@@ -111,9 +114,9 @@ nav.tabs a.cur{color:var(--accent);font-weight:700;box-shadow:inset 0 3px 0 var(
   <main id="main"></main>
 </div>
 <nav class="tabs" aria-label="工具"><div class="in">
-  <a href="okr-shatter.html">计划</a>
+  <a href="okr-shatter.html">碎冰台</a>
   <a href="okr-log.html" class="cur" aria-current="page">登记</a>
-  <a href="okr-dashboard.html">看板</a>
+  <a href="index.html">个人看板</a>
 </div></nav>
 
 <script>
@@ -177,6 +180,10 @@ function itemsFor(o,date){
   steps.sort((x,y)=>(x.s.date||'9999').localeCompare(y.s.date||'9999'));
   return {daily,steps};
 }
+function daysIncl(a,b){if(!a||!b)return 0;const n=diffDays(a,b)+1;return n>0?n:0}
+function planned(a){if(a.type==='steps')return a.steps.filter(x=>!x.drop&&(x.name||'').trim()).length;const d=daysIncl(a.start,a.end),t=Math.max(1,+a.times||1);if(!d)return 0;return a.every==='week'?Math.max(1,Math.round(d/7))*t:d*t}
+function doneAll(a){return L.checks.filter(c=>c.actionId===a.id&&(a.type==='steps'?!!c.stepId:!c.stepId)).length}
+function oProgress(o){const kIds=new Set(P.krs.filter(k=>k.oId===o.id).map(k=>k.id));let d=0,t=0;P.actions.filter(a=>kIds.has(a.krId)&&(a.name||'').trim()).forEach(a=>{const n=planned(a);t+=n;d+=Math.min(doneAll(a),n)});return {d,t}}
 function dayChecks(aid,date){return L.checks.filter(c=>c.actionId===aid&&!c.stepId&&c.date===date)}
 function weekChecks(aid,date){const ws=weekStart(date),we=addDays(ws,6);return L.checks.filter(c=>c.actionId===aid&&!c.stepId&&c.date>=ws&&c.date<=we)}
 
@@ -194,13 +201,16 @@ function render(){
   let total=0,done=0,h='';
   os.forEach(o=>{
     const {daily,steps}=itemsFor(o,D);if(!daily.length&&!steps.length)return;
-    h+=`<div class="oh"><span>目标 · ${o.end?'到 '+md(o.end):''}</span><b>${esc(o.title||'未命名目标')}</b></div>`;
+    const op=oProgress(o),pct=op.t?Math.round(op.d/op.t*100):0;
+    h+=`<div class="oh"><span>目标 · ${o.end?'到 '+md(o.end):''}</span><b>${esc(o.title||'未命名目标')}</b>
+      <div class="oprog"><div class="bar"><i style="width:${pct}%"></i></div><span>总进度 ${op.d}/${op.t} · ${pct}%</span></div></div>`;
     if(daily.length){
       h+=`<section><h2>每日</h2><div class="card">${daily.map(({a,kr})=>{
         const times=Math.max(1,+a.times||1);
         let n,label;
         if(a.every==='week'){n=weekChecks(a.id,D).length;label=`KR${krIndex(kr)} · 每周 ${times} 次 · 本周 ${Math.min(n,times)}/${times}`}
         else{n=dayChecks(a.id,D).length;label=`KR${krIndex(kr)}`+(times>1?` · 每天 ${times} 次`:'')}
+        label+=` · 累计 ${Math.min(doneAll(a),planned(a))}/${planned(a)}`;
         const filled=Math.min(n,times);
         // 只有今天这一项算进进度：每天型按次数，每周型若本周未满算 1 件
         if(a.every==='week'){const mine=dayChecks(a.id,D).length;if(filled<times||mine){total++;if(mine)done++}}
@@ -215,7 +225,7 @@ function render(){
         if(!s.date)when='不限日期';
         else{const dd=diffDays(D,s.date);when=md(s.date)+(ck?'':dd<0?` · 已过 ${-dd} 天`:dd===0?' · 就是今天':` · 还有 ${dd} 天`)}
         const late=!ck&&s.date&&s.date<D;
-        return `<div class="item ${ck?'done':''}"><span class="t"><span class="meta ${late?'late':''}">KR${krIndex(kr)} · ${esc(a.name)} · ${when}</span><span class="nm">${esc(s.name)}</span></span>
+        return `<div class="item ${ck?'done':''}"><span class="t"><span class="meta ${late?'late':''}">KR${krIndex(kr)} · ${esc(a.name)} ${Math.min(doneAll(a),planned(a))}/${planned(a)} · ${when}</span><span class="nm">${esc(s.name)}</span></span>
           <span class="dots"><button type="button" class="dot ${ck?'on':''}" data-step="${a.id}:${s.id}" aria-label="${esc(s.name)}${ck?'，已完成':''}" aria-pressed="${!!ck}"><i></i></button></span></div>`}).join('')}</div></section>`;
     }
   });

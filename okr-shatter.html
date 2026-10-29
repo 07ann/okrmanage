@@ -34,6 +34,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 /* 顶栏 */
 .top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:calc(14px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;flex-direction:column;gap:12px}
 .toprow{display:flex;align-items:center;gap:10px}
+.jump{display:flex;justify-content:space-between;margin:-4px 0 -2px}
+.jump a{font-size:13px;color:var(--accent-ink);text-decoration:none;padding:4px 0}
+.jump a:hover{text-decoration:underline}
 .brand{font-weight:700;font-size:17px;white-space:nowrap}
 .osel{flex:1;min-width:0;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:0 8px;font-size:14px}
 .newo{height:36px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:13px;white-space:nowrap}
@@ -126,6 +129,7 @@ textarea.field{height:auto;padding:8px 10px;resize:none;line-height:1.5}
 <body>
 <div class="app">
   <header class="top">
+    <nav class="jump" aria-label="其他页面"><a href="index.html">← 个人看板</a><a href="okr-log.html">OKR 登记 →</a></nav>
     <div class="toprow">
       <span class="brand">OKR 碎冰台</span>
       <select class="osel" id="osel" aria-label="切换目标"></select>

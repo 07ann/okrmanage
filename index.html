@@ -919,7 +919,8 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
         }
         return sub;
       });
-      Object.keys(old).forEach(function (k) {   /* 计划里删掉的步骤 */
+      Object.keys(old).forEach(function (k) {   /* 计划里删掉的步骤（每日任务子项目另外处理） */
+        if (old[k].okr && old[k].okr.repeat) return;
         var c = old[k].cardId && find(old[k].cardId);
         if (!c) return;
         if (c.col === 'done') delete c.subId;
@@ -967,6 +968,20 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
           state.okrMade[key] = made + 1;
         }
       });
+
+      /* 每日 / 每周任务也作为子项目，排在最前面；勾选 = 完成今天那张卡片 = 打卡，第二天自动复位 */
+      var rsubs = acts.filter(function (a) { return a.type === 'repeat' && a.start && a.end && today >= a.start && today <= a.end; }).map(function (a) {
+        var id = 'okr-r-' + a.id, sub = old[id] || { id: id, okr: { actionId: a.id, repeat: true } };
+        var times = Math.max(1, +a.times || 1);
+        sub.title = a.name.trim() + (a.every === 'week' ? '（每周 ' + times + ' 次）' : times > 1 ? '（每天 ' + times + ' 次）' : '（每天）');
+        var todays = state.cards.filter(function (c) { return c.okr && c.okr.actionId === a.id && c.okr.date === today; });
+        var card = todays.filter(function (c) { return c.col !== 'done'; })[0] || todays[todays.length - 1];
+        if (card) sub.cardId = card.id; else delete sub.cardId;
+        var ws = okrWeekStart(today), we = ymd(parseYmd(ws).getTime() + 6 * DAY);
+        sub.done = (a.every === 'week' ? okrCount(log, a.id, ws, we) : okrCount(log, a.id, today, today)) >= times;
+        return sub;
+      });
+      p.subs = rsubs.concat(p.subs.filter(function (x) { return !(x.okr && x.okr.repeat); }));
     });
 
     /* 计划里删掉的重复行动：没完成的卡片移走 */
@@ -1464,7 +1479,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 
     var el = h('div', { class: 'proj' }, [
       h('div', { class: 'proj-top' }, [h('span', { class: 'grip', title: '拖动排序', text: '⋮⋮' }), rb, h('div', { class: 'proj-name' }, [
-        h('button', { type: 'button', class: 't', text: p.name, onclick: function () { openProject(p.id); } }),
+        h('button', { type: 'button', class: 't', text: p.name, title: p.okr ? '去 OKR 登记' : null, onclick: function () { if (p.okr) location.href = 'okr-log.html'; else openProject(p.id); } }),
         h('div', { class: 'meta' }, [state.sample ? h('span', { class: 'chip ex', text: '示例' }) : null, catChip(p.cat),
           h('span', { class: 'chip' + (pr.total && pr.done === pr.total ? ' ok' : ''), text: pr.total ? pr.unit + ' ' + pr.done + '/' + pr.total : '还没有子项目' })])
       ])]),
@@ -1473,7 +1488,8 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
       h('div', { class: 'proj-foot' }, [
         p.subs.length > 8 ? h('span', { text: '还有 ' + (p.subs.length - 8) + ' 项' }) : null,
         starts ? h('span', { text: '已启动 ' + starts + ' 次' }) : null,
-        h('button', { type: 'button', class: 'link', text: '编辑', onclick: function () { openProject(p.id); } })
+        p.okr ? h('a', { class: 'link', href: 'okr-log.html', text: '去登记 ›' }) : null,
+        p.okr ? h('a', { class: 'link', href: 'okr-shatter.html', text: '改计划' }) : h('button', { type: 'button', class: 'link', text: '编辑', onclick: function () { openProject(p.id); } })
       ])
     ]);
     makeSortable(el, 'proj', p.id, function (src, after) { reorder(state.projects, src, p.id, after); save(); render(); });
@@ -1606,7 +1622,9 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
         h('button', { class: 'btn', type: 'button', text: '＋ 新建项目', onclick: function () { openProject(null); } }),
         h('button', { class: 'btn', type: 'button', text: '月历', onclick: function () { openCal(); } }),
         h('button', { class: 'btn', type: 'button', text: '同步', onclick: openSync }),
-        h('button', { class: 'btn', type: 'button', text: '数据', onclick: openIO })
+        h('button', { class: 'btn', type: 'button', text: '数据', onclick: openIO }),
+        h('a', { class: 'btn', href: 'okr-shatter.html', style: 'text-decoration:none', text: '碎冰台' }),
+        h('a', { class: 'btn', href: 'okr-log.html', style: 'text-decoration:none', text: 'OKR 登记' })
       ]),
       (function () { var el = h('span', { id: 'syncState', role: 'button', tabindex: '0', onclick: openSync, onkeydown: function (e) { if (e.key === 'Enter') openSync(); } }); paintSync(el); return el; })()
     ]));
