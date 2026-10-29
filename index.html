@@ -297,6 +297,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 .chip.easy { background: var(--ok); color: var(--card); font-weight: 500; }
 .chip.ok { background: var(--ok-soft); color: var(--ok); }
 .chip.ex { border: 1px dashed var(--line); background: none; }
+.chip.ddl { background: var(--accent-soft, #e3e9f7); color: var(--accent); }
 .age { margin-left: auto; font-family: var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .waitbar { height: 4px; border-radius: 2px; background: var(--wait-soft); overflow: hidden; }
 .waitbar i { display: block; height: 100%; background: var(--wait); }
@@ -308,8 +309,14 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 /* 项目卡 */
 .col.projects { background: var(--card); }
 .proj { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; background: var(--surface); min-width: 0; position: relative; }
-.ftime { display: grid; gap: 4px; }
+.ftime { display: grid; gap: 6px; }
+.ftime .trow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ftime .lab { font-size: 12px; color: var(--muted); width: 28px; flex: none; }
 .ftime .unit { font-size: 12px; color: var(--muted); }
+.ftime .spacer { flex: 1; }
+.apick { display: inline-flex; gap: 2px; }
+.apick button { border: none; background: none; padding: 2px; font-size: 18px; line-height: 1; filter: grayscale(1); opacity: .35; border-radius: 4px; }
+.apick button.on { filter: none; opacity: 1; }
 .proj.over { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .proj.drop-before { box-shadow: 0 -3px 0 var(--accent); }
 .proj.drop-after { box-shadow: 0 3px 0 var(--accent); }
@@ -569,7 +576,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
     </div>
     <div class="row2">
       <label class="field"><span>所属项目</span><select id="fProj"></select></label>
-      <div class="field" id="fTimeWrap" hidden><span>用时</span><div id="fTime" class="ftime"></div></div>
+      <div class="field" id="fTimeWrap"><span>时间（1 个 🍎 = 20 分钟）</span><div id="fTime" class="ftime"></div></div>
     </div>
     <label class="field"><span>所在列</span>
       <select id="fCol">
@@ -600,6 +607,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
         <label><input type="radio" name="pCat" id="pCatMe" value="个人"> 个人</label>
       </div>
     </div>
+    <label class="field"><span>DDL 截止日期（可选）</span><input type="date" id="pDdl"></label>
     <label class="field"><span>目标 / 说明（可选）</span><textarea id="pNote" placeholder="比如：年底前发出 4 篇"></textarea></label>
     <div class="field"><span>子项目</span>
       <div class="subs" id="pSubs"></div>
@@ -1198,6 +1206,10 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   }
 
   var state = load() || sample();
+  (function () {
+    var names = ['个人公众号', '播客下一期', '月度内容复盘'];
+    if (state.sample && (state.cards.length > 6 || state.projects.some(function (p) { return names.indexOf(p.name) < 0; }))) state.sample = false;
+  })();
   var view = 'week', weekOffset = 0, dayStr = ymd(Date.now()), arrivedId = null;
   var mq = null;
   try { mq = window.matchMedia('(max-width: 640px)'); } catch (e) {}
@@ -1210,7 +1222,22 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   var ZOMBIE_DAYS = 30, STALE_DAYS = 21;
   function lastAct(c) { return c.touched || c.moved; }
   function touch(c) { if (c) c.touched = Date.now(); }
-  function isZombie(c) { return (c.col === 'todo' || c.col === 'doing') && daysSince(lastAct(c)) >= ZOMBIE_DAYS; }
+  function ddlLeft(p) {
+    if (!p || !p.ddl) return null;
+    var t = new Date(); t.setHours(0, 0, 0, 0);
+    return Math.round((parseYmd(p.ddl) - t) / DAY);
+  }
+  function cardOverdue(c) {
+    var p = c.projectId && findProj(c.projectId), n = ddlLeft(p);
+    return n !== null && n < 0 ? -n : 0;
+  }
+  function isZombie(c) { return (c.col === 'todo' || c.col === 'doing') && (daysSince(lastAct(c)) >= ZOMBIE_DAYS || cardOverdue(c) > 0); }
+  function ddlChip(p, forCard) {
+    var n = ddlLeft(p); if (n === null) return null;
+    if (!forCard && progress(p).total && progress(p).done === progress(p).total) return h('span', { class: 'chip ok', text: 'DDL ' + md(parseYmd(p.ddl)) + ' · 已完成' });
+    var txt = n < 0 ? '超过 DDL ' + (-n) + ' 天' : n === 0 ? '今天截止' : '剩 ' + n + ' 天';
+    return h('span', { class: 'chip ' + (n <= 1 ? 'late' : 'ddl'), title: 'DDL ' + p.ddl, text: (forCard ? '' : 'DDL ' + md(parseYmd(p.ddl)) + ' · ') + txt });
+  }
   function findProj(id) { return state.projects.filter(function (p) { return p.id === id; })[0]; }
   function findSub(c) {
     var p = c.projectId && findProj(c.projectId);
@@ -1423,7 +1450,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       onclick: function () { openCard(c.id); }, onkeydown: function (e) { if (e.key === 'Enter') openCard(c.id); } },
       [h('i', { class: 'cdot ' + (c.cat === '个人' ? 'me' : 'work'), title: c.cat }), h('span', { text: c.title })]));
     var m = h('div', { class: 'meta' });
-    if (state.sample) m.appendChild(h('span', { class: 'chip ex', text: '示例' }));
     var p = c.projectId && findProj(c.projectId);
     if (p) m.appendChild(h('span', { class: 'chip', text: '▸ ' + p.name }));
     var dchip = diffChip(c); if (dchip) m.appendChild(dchip);
@@ -1441,8 +1467,10 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     } else if (c.col === 'done') {
       age = h('span', { class: 'age', text: '✓ ' + md(new Date(c.doneAt || c.moved)) });
     } else {
-      var mdays = daysSince(lastAct(c));
-      if (mdays >= ZOMBIE_DAYS) m.appendChild(h('span', { class: 'chip zombie', text: '僵尸 · ' + mdays + ' 天' }));
+      var mdays = daysSince(lastAct(c)), od = cardOverdue(c);
+      if (od) m.appendChild(h('span', { class: 'chip zombie', text: '僵尸 · 超 DDL ' + od + ' 天' }));
+      else if (p && p.ddl) m.appendChild(ddlChip(p, true));
+      if (od) {} else if (mdays >= ZOMBIE_DAYS) m.appendChild(h('span', { class: 'chip zombie', text: '僵尸 · ' + mdays + ' 天' }));
       else if (mdays >= STALE_DAYS) m.appendChild(h('span', { class: 'chip stale', text: mdays + ' 天没动' }));
       age = h('span', { class: 'age', text: mdays + ' 天' });
     }
@@ -1514,7 +1542,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     var el = h('div', { class: 'proj' }, [
       h('div', { class: 'proj-top' }, [h('span', { class: 'grip', title: '拖动排序', text: '⋮⋮' }), rb, h('div', { class: 'proj-name' }, [
         h('button', { type: 'button', class: 't', text: p.name, title: p.okr ? '去 OKR 登记' : null, onclick: function () { if (p.okr) location.href = 'okr-log.html'; else openProject(p.id); } }),
-        h('div', { class: 'meta' }, [state.sample ? h('span', { class: 'chip ex', text: '示例' }) : null, catChip(p.cat),
+        h('div', { class: 'meta' }, [catChip(p.cat), ddlChip(p),
           h('span', { class: 'chip' + (pr.total && pr.done === pr.total ? ' ok' : ''), text: pr.total ? pr.unit + ' ' + pr.done + '/' + pr.total : '还没有子项目' })])
       ])]),
       p.subs.length ? seg : null,
@@ -1542,7 +1570,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   /* ---------- 僵尸任务 ---------- */
   var zConfirm = null;
   function zombieCard(ws, we) {
-    var zs = state.cards.filter(function (c) { return passCat(c) && isZombie(c); }).sort(function (a, b) { return lastAct(a) - lastAct(b); });
+    var zs = state.cards.filter(function (c) { return passCat(c) && isZombie(c); }).sort(function (a, b) { return (cardOverdue(b) - cardOverdue(a)) || (lastAct(a) - lastAct(b)); });
     var log = state.zlog.filter(function (z) { return z.ts >= ws && z.ts < we; });
     var mx = h('div', { class: 'mx', 'aria-label': '本周处理 ' + log.length + ' 件，还剩 ' + zs.length + ' 件' });
     log.slice(-20).forEach(function (z) { mx.appendChild(h('i', { class: z.kind === 'do' ? 'z-do' : 'z-drop', title: (z.kind === 'do' ? '做了十分钟：' : '放弃：') + z.title })); });
@@ -1554,7 +1582,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       var c = zs[0], p = c.projectId && findProj(c.projectId);
       var one = h('div', { class: 'zone' }, [
         h('div', { class: 'zt', text: c.title }),
-        h('div', { class: 'meta' }, [h('span', { class: 'zage', text: daysSince(lastAct(c)) + ' 天没动' }), catChip(c.cat), p ? h('span', { class: 'chip', text: '▸ ' + p.name }) : null])
+        h('div', { class: 'meta' }, [h('span', { class: 'zage', text: cardOverdue(c) ? '超过 DDL ' + cardOverdue(c) + ' 天' : daysSince(lastAct(c)) + ' 天没动' }), catChip(c.cat), p ? h('span', { class: 'chip', text: '▸ ' + p.name }) : null])
       ]);
       var acts = h('div', { class: 'zacts' });
       if (zConfirm === c.id) {
@@ -2025,16 +2053,32 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   var editing = null;
   function syncWait() { $('fWaitWrap').hidden = $('fCol').value !== 'wait'; }
   function diffVal() { return $('fDiffEasy').checked ? 'easy' : $('fDiffHard').checked ? 'hard' : 'normal'; }
+  /* 编辑任务里的 🍎：计划点选个数，实际可补记 / 撤回 */
+  var formEst = 0;
+  function renderFTime() {
+    var tb = $('fTime'); tb.textContent = '';
+    var c = editing ? find(editing) : null;
+    var est = formEst || DEF_EST[diffVal()] || 2;
+    var planBox = h('span', { class: 'apick', role: 'group', 'aria-label': '计划用几个 ' + APPLE });
+    for (var i = 1; i <= 8; i++) (function (n) {
+      planBox.appendChild(h('button', { type: 'button', class: n <= est ? 'on' : null, 'aria-label': '计划 ' + n + ' 个', 'aria-pressed': n <= est ? 'true' : 'false', text: APPLE,
+        onclick: function () { formEst = n; renderFTime(); } }));
+    })(i);
+    tb.appendChild(h('div', { class: 'trow' }, [h('span', { class: 'lab', text: '计划' }), planBox, h('span', { class: 'unit', text: est + ' 个 · ' + fmtMin(est * FOCUS_MIN) })]));
+    if (!c) return;
+    var todayS = ymd(Date.now()), mins = totalMin(c.sessions), earned = mins / FOCUS_MIN;
+    var hasManual = c.sessions.some(function (x) { return x.manual && ymd(x.ts) === todayS; });
+    tb.appendChild(h('div', { class: 'trow' }, [h('span', { class: 'lab', text: '实际' }), appleRow(0, earned, { cap: 8, label: '实际：' }),
+      h('span', { class: 'unit', text: (Math.round(earned * 10) / 10) + ' 个 · ' + fmtMin(mins) }),
+      h('span', { class: 'spacer' }),
+      h('button', { type: 'button', class: 'btn small', title: '补记 20 分钟（记在今天）', text: '+' + APPLE, onclick: function () { c.sessions.push({ ts: Date.now(), min: FOCUS_MIN, manual: true }); touch(c); save(); render(); renderFTime(); } }),
+      hasManual ? h('button', { type: 'button', class: 'btn small', title: '撤回今天补记的一个', text: '−' + APPLE, onclick: function () {
+        for (var k = c.sessions.length - 1; k >= 0; k--) if (c.sessions[k].manual && ymd(c.sessions[k].ts) === todayS) { c.sessions.splice(k, 1); break; }
+        save(); render(); renderFTime(); } }) : null]));
+  }
   function openCard(id) {
     editing = id || null;
     var c = id ? find(id) : null;
-    var tw = $('fTimeWrap'), tb = $('fTime'); tb.textContent = '';
-    if (c) {
-      var mins = totalMin(c.sessions), earned = mins / FOCUS_MIN;
-      tb.appendChild(appleRow(c.est, earned, { cap: 12, label: c.title + '：' }));
-      tb.appendChild(h('span', { class: 'unit', text: '计划 ' + c.est + ' 个 · 实际 ' + (Math.round(earned * 10) / 10) + ' 个（' + fmtMin(mins) + '）· 启动 ' + c.sessions.length + ' 次' }));
-      tw.hidden = false;
-    } else tw.hidden = true;
     $('cardTitle').textContent = c ? '编辑任务' : '新建任务';
     $('fTitle').value = c ? c.title : '';
     var cat = c ? c.cat : (state.filter !== 'all' ? state.filter : '工作');
@@ -2042,6 +2086,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     (c && c.type === 'unplanned' ? $('fTypeUn') : $('fTypePlan')).checked = true;
     var dv = c ? c.diff : 'normal';
     $(dv === 'easy' ? 'fDiffEasy' : dv === 'hard' ? 'fDiffHard' : 'fDiffNormal').checked = true;
+    formEst = c ? c.est : 0; renderFTime();
     var sel = $('fProj'); sel.textContent = '';
     sel.appendChild(h('option', { value: '', text: '不属于任何项目' }));
     state.projects.forEach(function (p) { if (p.okr && !(c && c.projectId === p.id)) return; sel.appendChild(h('option', { value: p.id, text: p.name + '（' + p.cat + '）' })); });
@@ -2054,6 +2099,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   }
   function closeCard() { $('cardOverlay').hidden = true; editing = null; }
   $('fCol').addEventListener('change', syncWait);
+  ['fDiffEasy', 'fDiffNormal', 'fDiffHard'].forEach(function (id) { $(id).addEventListener('change', function () { if (!editing) { formEst = 0; renderFTime(); } }); });
   $('fProj').addEventListener('change', function () { var p = findProj(this.value); if (p) (p.cat === '个人' ? $('fCatMe') : $('fCatWork')).checked = true; });
   $('cardForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -2070,7 +2116,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     c.title = title; c.col = col;
     c.cat = $('fCatMe').checked ? '个人' : '工作';
     c.type = $('fTypeUn').checked ? 'unplanned' : 'plan';
-    var nd = diffVal(); if (!c.est || nd !== c.diff) c.est = DEF_EST[nd]; c.diff = nd;
+    var nd = diffVal(); if (formEst) c.est = formEst; else if (!c.est || nd !== c.diff) c.est = DEF_EST[nd]; c.diff = nd;
     c.projectId = newProj;
     if (newProj && !c.subId && !c.okr) { var np = findProj(newProj); if (np && !np.okr) { c.projectId = null; linkCardToProject(c, np); } }
     c.waitFor = $('fWait').value.trim();
@@ -2106,6 +2152,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     $('pName').value = pCur.name;
     (pCur.cat === '个人' ? $('pCatMe') : $('pCatWork')).checked = true;
     $('pNote').value = pCur.note || '';
+    $('pDdl').value = pCur.ddl || '';
     $('pSubInput').value = '';
     $('projSaved').hidden = true;
     var del = $('projDel'); del.hidden = !p; del.dataset.confirm = ''; del.textContent = '删除项目';
@@ -2141,6 +2188,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     var name = $('pName').value.trim();
     if (!name) { toast('先写项目名称'); $('pName').focus(); return false; }
     pCur.name = name; pCur.cat = $('pCatMe').checked ? '个人' : '工作'; pCur.note = $('pNote').value.trim();
+    if ($('pDdl').value) pCur.ddl = $('pDdl').value; else delete pCur.ddl;
+    state.sample = false;
     if (pIsNew) { state.projects.push(pCur); pIsNew = false; $('projTitle').textContent = '编辑项目'; $('projDel').hidden = false; }
     return true;
   }
