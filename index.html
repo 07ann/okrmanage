@@ -53,6 +53,21 @@
   color-scheme: dark;
 }
 
+/* 三个工具共用的左上角切换：点名称展开列表 */
+.appnav{position:relative;flex:none}
+.appnav summary{list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;font-size:20px;font-family:var(--font-display);font-weight:700;color:var(--ink);cursor:pointer;border-radius:8px;user-select:none}
+.appnav summary::-webkit-details-marker{display:none}
+.appnav summary::after{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.appnav[open] summary::after{transform:translateY(2px) rotate(-135deg)}
+.appnav summary:hover{color:var(--accent)}
+.appmenu{position:absolute;left:0;top:calc(100% + 6px);z-index:60;min-width:220px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(20,30,40,.14);padding:6px;display:flex;flex-direction:column;gap:2px}
+.appmenu a{display:flex;flex-direction:column;gap:1px;padding:8px 12px;border-radius:7px;text-decoration:none;color:var(--ink)}
+.appmenu a b{font-size:15px}
+.appmenu a span{font-size:12px;color:var(--muted)}
+.appmenu a:hover{background:var(--accent-soft)}
+.appmenu a[aria-current="page"]{background:var(--accent-soft)}
+.appmenu a[aria-current="page"] b::after{content:" ✓";color:var(--accent)}
+.navrow { display: flex; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.55; }
@@ -627,6 +642,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
       <span class="spacer"></span>
       <button type="button" class="btn" id="ioClose">关闭</button>
       <button type="button" class="btn" id="ioDownload">下载备份文件</button>
+      <button type="button" class="btn" id="ioXlsx">导出本周任务（Excel）</button>
       <button type="button" class="btn primary" id="ioCopy">复制</button>
     </div>
     <div style="border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px">
@@ -640,6 +656,8 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
+document.addEventListener('click',function(e){document.querySelectorAll('details.appnav[open]').forEach(function(d){if(!d.contains(e.target))d.removeAttribute('open')})});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('details.appnav[open]').forEach(function(d){d.removeAttribute('open')})});
 (function () {
   var KEY = 'personal-kanban-v2', OLD_KEY = 'personal-kanban-v1';
   var DAY = 864e5, FOCUS_MIN = 20, APPLE = '🍎';
@@ -1616,15 +1634,13 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
     curWeek = days;
 
     app.appendChild(h('header', null, [
-      h('h1', { text: '个人工作看板' }),
       h('div', { class: 'actions' }, [
         h('button', { class: 'btn primary', type: 'button', text: '＋ 新建任务', onclick: function () { openCard(null); } }),
         h('button', { class: 'btn', type: 'button', text: '＋ 新建项目', onclick: function () { openProject(null); } }),
         h('button', { class: 'btn', type: 'button', text: '月历', onclick: function () { openCal(); } }),
         h('button', { class: 'btn', type: 'button', text: '同步', onclick: openSync }),
-        h('button', { class: 'btn', type: 'button', text: '数据', onclick: openIO }),
-        h('a', { class: 'btn', href: 'okr-shatter.html', style: 'text-decoration:none', text: '碎冰台' }),
-        h('a', { class: 'btn', href: 'okr-log.html', style: 'text-decoration:none', text: 'OKR 登记' })
+        h('button', { class: 'btn', type: 'button', text: '导出本周', title: '把这一周的任务导出成 Excel', onclick: exportWeek }),
+        h('button', { class: 'btn', type: 'button', text: '数据', onclick: openIO })
       ]),
       (function () { var el = h('span', { id: 'syncState', role: 'button', tabindex: '0', onclick: openSync, onkeydown: function (e) { if (e.key === 'Enter') openSync(); } }); paintSync(el); return el; })()
     ]));
@@ -1970,6 +1986,12 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 
   function render() {
     var app = $('app'); app.textContent = '';
+    app.appendChild(h('div', { class: 'navrow' }, [h('details', { class: 'appnav' }, [
+      h('summary', { 'aria-label': '切换工具，当前：看板', text: '看板' }),
+      h('div', { class: 'appmenu' }, [
+        h('a', { href: 'okr-shatter.html' }, [h('b', { text: 'OKR 碎冰台' }), h('span', { text: '把目标拆成行动计划' })]),
+        h('a', { href: 'okr-log.html' }, [h('b', { text: '登记' }), h('span', { text: '每天打卡、看进度' })]),
+        h('a', { href: 'index.html', 'aria-current': 'page' }, [h('b', { text: '看板' }), h('span', { text: '个人工作看板' })])])])]));
     if (view === 'week') renderWeek(app); else renderDay(app);
     renderTimerBar();
   }
@@ -2125,8 +2147,115 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
   });
   $('wCancel').addEventListener('click', closeWait);
 
+  /* ---------- 导出本周任务（Excel .xlsx，本地生成，不依赖外部库） ---------- */
+  var CRC_T = null;
+  function crc32(u8) {
+    if (!CRC_T) { CRC_T = []; for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
+    var crc = -1; for (var i = 0; i < u8.length; i++) crc = (crc >>> 8) ^ CRC_T[(crc ^ u8[i]) & 255];
+    return (crc ^ -1) >>> 0;
+  }
+  function zipStore(files) {
+    var enc = new TextEncoder(), parts = [], central = [], off = 0;
+    files.forEach(function (f) {
+      var nm = enc.encode(f.name), d = f.data, crc = crc32(d);
+      var lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true); lh.setUint32(14, crc, true); lh.setUint32(18, d.length, true);
+      lh.setUint32(22, d.length, true); lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), nm, d);
+      var ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+      ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true); ch.setUint32(16, crc, true);
+      ch.setUint32(20, d.length, true); ch.setUint32(24, d.length, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+      central.push(new Uint8Array(ch.buffer), nm);
+      off += 30 + nm.length + d.length;
+    });
+    var cs = central.reduce(function (a, x) { return a + x.length; }, 0);
+    var end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cs, true); end.setUint32(16, off, true);
+    return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  function xesc(v) { return String(v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''); }
+  function colName(i) { var s = ''; i++; while (i) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+  function sheetXml(rows, widths) {
+    var x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>';
+    if (widths) x += '<cols>' + widths.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols>';
+    x += '<sheetData>' + rows.map(function (r, ri) {
+      return '<row r="' + (ri + 1) + '">' + r.map(function (v, ci) {
+        var ref = colName(ci) + (ri + 1), st = ri === 0 ? ' s="1"' : '';
+        if (v === null || v === undefined || v === '') return '';
+        if (typeof v === 'number') return '<c r="' + ref + '"' + st + '><v>' + v + '</v></c>';
+        return '<c r="' + ref + '" t="inlineStr"' + st + '><is><t xml:space="preserve">' + xesc(v) + '</t></is></c>';
+      }).join('') + '</row>';
+    }).join('') + '</sheetData></worksheet>';
+    return x;
+  }
+  function xlsxBlob(sheets) {
+    var enc = new TextEncoder(), f = function (n, s) { return { name: n, data: enc.encode(s) }; }, X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    var files = [
+      f('[Content_Types].xml', X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+        sheets.map(function (s, i) { return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('') + '</Types>'),
+      f('_rels/.rels', X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'),
+      f('xl/workbook.xml', X + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+        sheets.map(function (s, i) { return '<sheet name="' + xesc(s.name) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>'; }).join('') + '</sheets></workbook>'),
+      f('xl/_rels/workbook.xml.rels', X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        sheets.map(function (s, i) { return '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>'; }).join('') +
+        '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'),
+      f('xl/styles.xml', X + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Microsoft YaHei"/></font><font><b/><sz val="11"/><name val="Microsoft YaHei"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE1E7F7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>')
+    ];
+    sheets.forEach(function (s, i) { files.push(f('xl/worksheets/sheet' + (i + 1) + '.xml', sheetXml(s.rows, s.widths))); });
+    return zipStore(files);
+  }
+  var DIFFN = { easy: '简单', normal: '普通', hard: '难启动' };
+  function cnDate(t) { var d = new Date(t); return (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
+  function exportWeek() {
+    var days = weekDays(weekOffset), ws = days[0].getTime(), we = ws + 7 * DAY;
+    var keys = days.map(function (d) { return ymd(d.getTime()); });
+    var list = state.cards.filter(function (c) {
+      var doneIn = c.col === 'done' && c.doneAt && c.doneAt >= ws && c.doneAt < we;
+      var open = c.col !== 'done' && (c.created || 0) < we;
+      var sess = c.sessions.some(function (s) { return s.ts >= ws && s.ts < we; });
+      var planned = keys.some(function (k) { return isPlanned(c.id, k); });
+      return doneIn || open || sess || planned;
+    });
+    var rank = { done: 0, doing: 1, wait: 2, todo: 3 };
+    list.sort(function (a, b) { return (rank[a.col] - rank[b.col]) || ((a.doneAt || a.moved || 0) - (b.doneAt || b.moved || 0)); });
+    var rows = [['任务', '分类', '类型', '所属项目', '当前状态', '难度', '预估 🍎', '本周专注（分钟）', '本周启动次数', '本周安排在', '创建日期', '完成日期', '完成是周几', '在等谁', '来自 OKR']];
+    var sum = { '工作': { d: 0, o: 0, w: 0, m: 0 }, '个人': { d: 0, o: 0, w: 0, m: 0 } };
+    list.forEach(function (c) {
+      var ss = c.sessions.filter(function (s) { return s.ts >= ws && s.ts < we; });
+      var mins = totalMin(ss), p = c.projectId && findProj(c.projectId);
+      var plannedOn = keys.filter(function (k) { return isPlanned(c.id, k); }).map(function (k) { return '周' + WD[wdIndex(parseYmd(k))]; }).join('、');
+      var doneIn = c.col === 'done' && c.doneAt && c.doneAt >= ws && c.doneAt < we;
+      rows.push([c.title, c.cat, c.type === 'unplanned' ? '插单' : '计划内', p ? p.name : '', COLNAME[c.col], DIFFN[c.diff] || '', c.est || '',
+        mins ? Math.round(mins) : 0, ss.length, plannedOn, c.created ? cnDate(c.created) : '',
+        c.col === 'done' && c.doneAt ? cnDate(c.doneAt) : '', c.col === 'done' && c.doneAt ? '周' + WD[wdIndex(new Date(c.doneAt))] : '',
+        c.col === 'wait' ? (c.waitFor || '') : '', c.okr || (p && p.okr) ? '是' : '']);
+      var g = sum[c.cat] || sum['工作'];
+      if (doneIn) g.d++; else if (c.col === 'wait') g.w++; else if (c.col !== 'done') g.o++;
+      g.m += mins;
+    });
+    var range = md(days[0]) + '–' + md(days[6]);
+    var srows = [['分类', '本周完成', '进行中 / 待办', '等待中', '专注（分钟）'],
+      ['工作', sum['工作'].d, sum['工作'].o, sum['工作'].w, Math.round(sum['工作'].m)],
+      ['个人', sum['个人'].d, sum['个人'].o, sum['个人'].w, Math.round(sum['个人'].m)],
+      ['合计', sum['工作'].d + sum['个人'].d, sum['工作'].o + sum['个人'].o, sum['工作'].w + sum['个人'].w, Math.round(sum['工作'].m + sum['个人'].m)],
+      [], ['周期', range], ['导出时间', cnDate(Date.now()) + ' ' + pad(new Date().getHours()) + ':' + pad(new Date().getMinutes())]];
+    try {
+      var blob = xlsxBlob([{ name: '本周任务', rows: rows, widths: [34, 7, 8, 22, 9, 8, 8, 14, 12, 16, 11, 11, 10, 18, 9] }, { name: '汇总', rows: srows, widths: [10, 12, 14, 10, 14] }]);
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = '个人看板-本周任务-' + range.replace(/\//g, '.') + '.xlsx';
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      toast('已导出 ' + (rows.length - 1) + ' 个任务');
+    } catch (e) { toast('这个浏览器没法导出，换一个浏览器试试'); }
+  }
+
   /* ---------- backup ---------- */
   function openIO() { $('ioText').value = JSON.stringify(state, null, 1); var cb = $('ioClear'); cb.dataset.confirm = ''; cb.textContent = '清空看板数据'; $('ioOverlay').hidden = false; }
+  $('ioXlsx').addEventListener('click', function () { exportWeek(); });
   $('ioDownload').addEventListener('click', function () {
     try {
       var blob = new Blob([JSON.stringify(state, null, 1)], { type: 'application/json' });

@@ -6,30 +6,45 @@
 <title>OKR 登记</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>
 :root{
-  --bg:#F4F8FB; --card:#FFFFFF; --ink:#142231; --muted:#5A6B7D; --faint:#8296AA;
-  --line:#DCE5EE; --line2:#EEF3F8; --accent:#2F7DB8; --accent-ink:#1F5C8C; --accent-soft:#DDEBF7; --accent-bg:#EEF5FB;
-  --warn:#C2620A; --warn-ink:#8A4A00; --warn-soft:#FCEBD3; --on-accent:#FFFFFF; --ring:#B8C7D6;
+  --bg:#e7ebee; --card:#ffffff; --ink:#1b2530; --muted:#5a6874; --faint:#8a96a0;
+  --line:#d1d8de; --line2:#e9edf0; --accent:#2e4a98; --accent-ink:#2e4a98; --accent-soft:#e1e7f7; --accent-bg:#eef1fa;
+  --ice:#e1e7f7; --warn:#a86d14; --warn-ink:#7a4f0e; --warn-soft:#fbefd9; --on-accent:#ffffff; --seg:#e7ebee; --ring:#b3bec7; --ok:#2b7a57;
   --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif; color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0F1923; --card:#172431; --ink:#E3ECF4; --muted:#9AAEC0; --faint:#71879B;
-  --line:#2A3B4C; --line2:#213242; --accent:#6CB0E6; --accent-ink:#A9D2F3; --accent-soft:#1D3A55; --accent-bg:#18304A;
-  --warn:#E9A75C; --warn-ink:#F2C38F; --warn-soft:#3A2A17; --on-accent:#0B1824; --ring:#4A6178; color-scheme:dark}}
+  --bg:#11171c; --card:#20292f; --ink:#e5eaee; --muted:#97a4af; --faint:#77848f;
+  --line:#303b44; --line2:#283239; --accent:#8fa7ee; --accent-ink:#b4c4f4; --accent-soft:#232f4d; --accent-bg:#1c2640;
+  --ice:#232f4d; --warn:#e2a74b; --warn-ink:#f0c47e; --warn-soft:#382c19; --on-accent:#11171c; --seg:#182026; --ring:#4a5763; --ok:#6cc69c; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0F1923; --card:#172431; --ink:#E3ECF4; --muted:#9AAEC0; --faint:#71879B;
-  --line:#2A3B4C; --line2:#213242; --accent:#6CB0E6; --accent-ink:#A9D2F3; --accent-soft:#1D3A55; --accent-bg:#18304A;
-  --warn:#E9A75C; --warn-ink:#F2C38F; --warn-soft:#3A2A17; --on-accent:#0B1824; --ring:#4A6178; color-scheme:dark}
+  --bg:#11171c; --card:#20292f; --ink:#e5eaee; --muted:#97a4af; --faint:#77848f;
+  --line:#303b44; --line2:#283239; --accent:#8fa7ee; --accent-ink:#b4c4f4; --accent-soft:#232f4d; --accent-bg:#1c2640;
+  --ice:#232f4d; --warn:#e2a74b; --warn-ink:#f0c47e; --warn-soft:#382c19; --on-accent:#11171c; --seg:#182026; --ring:#4a5763; --ok:#6cc69c; color-scheme:dark}
+/* 三个工具共用的左上角切换：点名称展开列表 */
+.appnav{position:relative;flex:none}
+.appnav summary{list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;font-size:20px;font-family:"Noto Serif SC","Songti SC",serif;font-weight:700;color:var(--ink);cursor:pointer;border-radius:8px;user-select:none}
+.appnav summary::-webkit-details-marker{display:none}
+.appnav summary::after{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.appnav[open] summary::after{transform:translateY(2px) rotate(-135deg)}
+.appnav summary:hover{color:var(--accent)}
+.appmenu{position:absolute;left:0;top:calc(100% + 6px);z-index:60;min-width:220px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(20,30,40,.14);padding:6px;display:flex;flex-direction:column;gap:2px}
+.appmenu a{display:flex;flex-direction:column;gap:1px;padding:8px 12px;border-radius:7px;text-decoration:none;color:var(--ink)}
+.appmenu a b{font-size:15px}
+.appmenu a span{font-size:12px;color:var(--muted)}
+.appmenu a:hover{background:var(--accent-soft)}
+.appmenu a[aria-current="page"]{background:var(--accent-soft)}
+.appmenu a[aria-current="page"] b::after{content:" ✓";color:var(--accent)}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-text-size-adjust:100%}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .app{max-width:640px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
 .top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top,0px)) 8px 12px;display:flex;flex-direction:column;gap:8px}
+.navrow{padding:0 8px 2px}
 .dater{display:flex;align-items:center;justify-content:space-between}
 .dater button.nav{width:44px;height:44px;border:none;background:none;font-size:24px;color:var(--accent);border-radius:10px}
 .dater button.nav:disabled{color:var(--line);cursor:default}
@@ -43,7 +58,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{
 .bar i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .25s}
 .prog span{font-size:13px;color:var(--muted);white-space:nowrap}
 
-main{flex:1;padding:16px 16px 100px;display:flex;flex-direction:column;gap:18px}
+main{flex:1;padding:16px 16px 48px;display:flex;flex-direction:column;gap:18px}
 .oh{display:flex;flex-direction:column;gap:2px}
 .oh span{font-size:12px;color:var(--muted)}
 .oh b{font-size:16px}
@@ -97,12 +112,13 @@ nav.tabs a.cur{color:var(--accent);font-weight:700;box-shadow:inset 0 3px 0 var(
 .conf{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:3px}
 .conf button{height:34px;border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:12px;padding:0}
 .conf button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:60;max-width:min(92vw,480px);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;font-size:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:60;max-width:min(92vw,480px);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;font-size:14px}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
+    <div class="navrow"><details class="appnav"><summary aria-label="切换工具，当前：登记">登记</summary><div class="appmenu"><a href="okr-shatter.html"><b>OKR 碎冰台</b><span>把目标拆成行动计划</span></a><a href="okr-log.html" aria-current="page"><b>登记</b><span>每天打卡、看进度</span></a><a href="index.html"><b>看板</b><span>个人工作看板</span></a></div></details></div>
     <div class="dater">
       <button type="button" class="nav" data-act="prev" aria-label="前一天">‹</button>
       <div class="dt"><b id="dtTitle"></b><span id="dtPill"></span></div>
@@ -113,13 +129,10 @@ nav.tabs a.cur{color:var(--accent);font-weight:700;box-shadow:inset 0 3px 0 var(
   </header>
   <main id="main"></main>
 </div>
-<nav class="tabs" aria-label="工具"><div class="in">
-  <a href="okr-shatter.html">碎冰台</a>
-  <a href="okr-log.html" class="cur" aria-current="page">登记</a>
-  <a href="index.html">个人看板</a>
-</div></nav>
 
 <script>
+document.addEventListener('click',function(e){document.querySelectorAll('details.appnav[open]').forEach(function(d){if(!d.contains(e.target))d.removeAttribute('open')})});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('details.appnav[open]').forEach(function(d){d.removeAttribute('open')})});
 /* 读 okr-plan（碎冰台写），写 okr-log：
    checks[{id,actionId,stepId?,date,src}]   reviews[{id,krId,date,value,confidence,note}] */
 const PK='okr-plan', LK='okr-log';
