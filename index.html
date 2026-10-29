@@ -576,6 +576,7 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
     </div>
     <div class="row2">
       <label class="field"><span>所属项目</span><select id="fProj"></select></label>
+      <label class="field"><span>DDL 截止日期（可选，过期自动进僵尸任务）</span><input type="date" id="fDdl"></label>
       <div class="field" id="fTimeWrap"><span>时间（1 个 🍎 = 20 分钟）</span><div id="fTime" class="ftime"></div></div>
     </div>
     <label class="field"><span>所在列</span>
@@ -1227,8 +1228,13 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     var t = new Date(); t.setHours(0, 0, 0, 0);
     return Math.round((parseYmd(p.ddl) - t) / DAY);
   }
+  function cardDdl(c) {
+    if (c.ddl) return c.ddl;
+    var p = c.projectId && findProj(c.projectId);
+    return p && p.ddl ? p.ddl : null;
+  }
   function cardOverdue(c) {
-    var p = c.projectId && findProj(c.projectId), n = ddlLeft(p);
+    var d = cardDdl(c), n = d ? ddlLeft({ ddl: d }) : null;
     return n !== null && n < 0 ? -n : 0;
   }
   function isZombie(c) { return (c.col === 'todo' || c.col === 'doing') && (daysSince(lastAct(c)) >= ZOMBIE_DAYS || cardOverdue(c) > 0); }
@@ -1236,7 +1242,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     var n = ddlLeft(p); if (n === null) return null;
     if (!forCard && progress(p).total && progress(p).done === progress(p).total) return h('span', { class: 'chip ok', text: 'DDL ' + md(parseYmd(p.ddl)) + ' · 已完成' });
     var txt = n < 0 ? '超过 DDL ' + (-n) + ' 天' : n === 0 ? '今天截止' : '剩 ' + n + ' 天';
-    return h('span', { class: 'chip ' + (n <= 1 ? 'late' : 'ddl'), title: 'DDL ' + p.ddl, text: (forCard ? '' : 'DDL ' + md(parseYmd(p.ddl)) + ' · ') + txt });
+    return h('span', { class: 'chip ' + (n <= 1 ? 'late' : 'ddl'), title: 'DDL ' + p.ddl, text: 'DDL ' + md(parseYmd(p.ddl)) + ' · ' + txt });
   }
   function findProj(id) { return state.projects.filter(function (p) { return p.id === id; })[0]; }
   function findSub(c) {
@@ -1469,7 +1475,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     } else {
       var mdays = daysSince(lastAct(c)), od = cardOverdue(c);
       if (od) m.appendChild(h('span', { class: 'chip zombie', text: '僵尸 · 超 DDL ' + od + ' 天' }));
-      else if (p && p.ddl) m.appendChild(ddlChip(p, true));
+      else if (cardDdl(c)) m.appendChild(ddlChip({ ddl: cardDdl(c) }, true));
       if (od) {} else if (mdays >= ZOMBIE_DAYS) m.appendChild(h('span', { class: 'chip zombie', text: '僵尸 · ' + mdays + ' 天' }));
       else if (mdays >= STALE_DAYS) m.appendChild(h('span', { class: 'chip stale', text: mdays + ' 天没动' }));
       age = h('span', { class: 'age', text: mdays + ' 天' });
@@ -2057,6 +2063,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   var formEst = 0;
   function renderFTime() {
     var tb = $('fTime'); tb.textContent = '';
+    $('fTimeWrap').hidden = diffVal() !== 'hard';
+    if (diffVal() !== 'hard') return;
     var c = editing ? find(editing) : null;
     var est = formEst || DEF_EST[diffVal()] || 2;
     var planBox = h('span', { class: 'apick', role: 'group', 'aria-label': '计划用几个 ' + APPLE });
@@ -2093,13 +2101,14 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     sel.value = c ? (c.projectId || '') : '';
     $('fCol').value = c ? c.col : 'todo';
     $('fWait').value = c ? (c.waitFor || '') : '';
+    $('fDdl').value = c ? (c.ddl || '') : '';
     var del = $('cardDel'); del.hidden = !c; del.dataset.confirm = ''; del.textContent = '删除';
     syncWait();
     $('cardOverlay').hidden = false; $('fTitle').focus();
   }
   function closeCard() { $('cardOverlay').hidden = true; editing = null; }
   $('fCol').addEventListener('change', syncWait);
-  ['fDiffEasy', 'fDiffNormal', 'fDiffHard'].forEach(function (id) { $(id).addEventListener('change', function () { if (!editing) { formEst = 0; renderFTime(); } }); });
+  ['fDiffEasy', 'fDiffNormal', 'fDiffHard'].forEach(function (id) { $(id).addEventListener('change', function () { if (!editing) formEst = 0; renderFTime(); }); });
   $('fProj').addEventListener('change', function () { var p = findProj(this.value); if (p) (p.cat === '个人' ? $('fCatMe') : $('fCatWork')).checked = true; });
   $('cardForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -2116,10 +2125,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     c.title = title; c.col = col;
     c.cat = $('fCatMe').checked ? '个人' : '工作';
     c.type = $('fTypeUn').checked ? 'unplanned' : 'plan';
-    var nd = diffVal(); if (formEst) c.est = formEst; else if (!c.est || nd !== c.diff) c.est = DEF_EST[nd]; c.diff = nd;
+    var nd = diffVal(); if (formEst && nd === 'hard') c.est = formEst; else if (!c.est || nd !== c.diff) c.est = DEF_EST[nd]; c.diff = nd;
     c.projectId = newProj;
     if (newProj && !c.subId && !c.okr) { var np = findProj(newProj); if (np && !np.okr) { c.projectId = null; linkCardToProject(c, np); } }
     c.waitFor = $('fWait').value.trim();
+    if ($('fDdl').value) c.ddl = $('fDdl').value; else delete c.ddl;
     if (col !== 'done') delete c.doneAt;
     if (col !== 'wait') delete c.waitSince;
     if (col === 'done' && state.timer && state.timer.cardId === c.id) finishTimer(false);
@@ -2304,7 +2314,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     });
     var rank = { done: 0, doing: 1, wait: 2, todo: 3 };
     list.sort(function (a, b) { return (rank[a.col] - rank[b.col]) || ((a.doneAt || a.moved || 0) - (b.doneAt || b.moved || 0)); });
-    var rows = [['任务', '分类', '类型', '所属项目', '当前状态', '难度', '预估 🍎', '本周专注（分钟）', '本周启动次数', '本周安排在', '创建日期', '完成日期', '完成是周几', '在等谁', '来自 OKR']];
+    var rows = [['任务', '分类', '类型', '所属项目', '当前状态', '难度', '预估 🍎', '本周专注（分钟）', '本周启动次数', '本周安排在', '创建日期', 'DDL', '完成日期', '完成是周几', '在等谁', '来自 OKR']];
     var sum = { '工作': { d: 0, o: 0, w: 0, m: 0 }, '个人': { d: 0, o: 0, w: 0, m: 0 } };
     list.forEach(function (c) {
       var ss = c.sessions.filter(function (s) { return s.ts >= ws && s.ts < we; });
@@ -2312,7 +2322,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       var plannedOn = keys.filter(function (k) { return isPlanned(c.id, k); }).map(function (k) { return '周' + WD[wdIndex(parseYmd(k))]; }).join('、');
       var doneIn = c.col === 'done' && c.doneAt && c.doneAt >= ws && c.doneAt < we;
       rows.push([c.title, c.cat, c.type === 'unplanned' ? '插单' : '计划内', p ? p.name : '', COLNAME[c.col], DIFFN[c.diff] || '', c.est || '',
-        mins ? Math.round(mins) : 0, ss.length, plannedOn, c.created ? cnDate(c.created) : '',
+        mins ? Math.round(mins) : 0, ss.length, plannedOn, c.created ? cnDate(c.created) : '', cardDdl(c) ? cnDate(parseYmd(cardDdl(c)).getTime()) : '',
         c.col === 'done' && c.doneAt ? cnDate(c.doneAt) : '', c.col === 'done' && c.doneAt ? '周' + WD[wdIndex(new Date(c.doneAt))] : '',
         c.col === 'wait' ? (c.waitFor || '') : '', c.okr || (p && p.okr) ? '是' : '']);
       var g = sum[c.cat] || sum['工作'];
@@ -2326,7 +2336,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       ['合计', sum['工作'].d + sum['个人'].d, sum['工作'].o + sum['个人'].o, sum['工作'].w + sum['个人'].w, Math.round(sum['工作'].m + sum['个人'].m)],
       [], ['周期', range], ['导出时间', cnDate(Date.now()) + ' ' + pad(new Date().getHours()) + ':' + pad(new Date().getMinutes())]];
     try {
-      var blob = xlsxBlob([{ name: '本周任务', rows: rows, widths: [34, 7, 8, 22, 9, 8, 8, 14, 12, 16, 11, 11, 10, 18, 9] }, { name: '汇总', rows: srows, widths: [10, 12, 14, 10, 14] }]);
+      var blob = xlsxBlob([{ name: '本周任务', rows: rows, widths: [34, 7, 8, 22, 9, 8, 8, 14, 12, 16, 11, 11, 11, 10, 18, 9] }, { name: '汇总', rows: srows, widths: [10, 12, 14, 10, 14] }]);
       var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
       a.download = '个人看板-本周任务-' + range.replace(/\//g, '.') + '.xlsx';
       document.body.appendChild(a); a.click();
