@@ -6,25 +6,28 @@
 <title>OKR 登记</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
 <style>
 :root{
-  --bg:#e7ebee; --card:#ffffff; --ink:#1b2530; --muted:#5a6874; --faint:#8a96a0;
-  --line:#d1d8de; --line2:#e9edf0; --accent:#2e4a98; --accent-ink:#2e4a98; --accent-soft:#e1e7f7; --accent-bg:#eef1fa;
-  --ice:#e1e7f7; --warn:#a86d14; --warn-ink:#7a4f0e; --warn-soft:#fbefd9; --on-accent:#ffffff; --seg:#e7ebee; --ring:#b3bec7; --ok:#2b7a57;
-  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif; color-scheme:light;
+  --bg:#f5f5f7; --card:#ffffff; --ink:#1d1d1f; --muted:#86868b; --faint:#aeaeb2;
+  --line:#e8e8ed; --line2:#f0f0f3; --accent:#2e9bff; --accent-ink:#0a7fe8; --accent-soft:#e8f3ff; --accent-bg:#f2f8ff;
+  --ice:#e8f3ff; --warn:#ff3b30; --warn-ink:#e0261c; --warn-soft:#fff0ef; --on-accent:#ffffff; --seg:rgba(0,0,0,.05); --ring:#d1d1d6; --ok:#2e9bff;
+  --me:#a8d3ff; --alert:#ff3b30; --ok-soft:#e8f3ff; --alert-soft:#fff0ef; --shadow:0 0 0 .5px rgba(0,0,0,.04),0 2px 10px rgba(0,0,0,.04);
+  --sans:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif; color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#11171c; --card:#20292f; --ink:#e5eaee; --muted:#97a4af; --faint:#77848f;
-  --line:#303b44; --line2:#283239; --accent:#8fa7ee; --accent-ink:#b4c4f4; --accent-soft:#232f4d; --accent-bg:#1c2640;
-  --ice:#232f4d; --warn:#e2a74b; --warn-ink:#f0c47e; --warn-soft:#382c19; --on-accent:#11171c; --seg:#182026; --ring:#4a5763; --ok:#6cc69c; color-scheme:dark}}
+  --bg:#000000; --card:#1c1c1e; --ink:#f5f5f7; --muted:#98989d; --faint:#636366;
+  --line:#2c2c2e; --line2:#232325; --accent:#409cff; --accent-ink:#6cb4ff; --accent-soft:#0f2a47; --accent-bg:#0c2038;
+  --ice:#0f2a47; --warn:#ff453a; --warn-ink:#ff6961; --warn-soft:#3a1513; --on-accent:#ffffff; --seg:rgba(255,255,255,.08); --ring:#48484a; --ok:#409cff;
+  --me:#2f5f8f; --alert:#ff453a; --ok-soft:#0f2a47; --alert-soft:#3a1513; --shadow:0 0 0 .5px rgba(255,255,255,.06); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#11171c; --card:#20292f; --ink:#e5eaee; --muted:#97a4af; --faint:#77848f;
-  --line:#303b44; --line2:#283239; --accent:#8fa7ee; --accent-ink:#b4c4f4; --accent-soft:#232f4d; --accent-bg:#1c2640;
-  --ice:#232f4d; --warn:#e2a74b; --warn-ink:#f0c47e; --warn-soft:#382c19; --on-accent:#11171c; --seg:#182026; --ring:#4a5763; --ok:#6cc69c; color-scheme:dark}
+  --bg:#000000; --card:#1c1c1e; --ink:#f5f5f7; --muted:#98989d; --faint:#636366;
+  --line:#2c2c2e; --line2:#232325; --accent:#409cff; --accent-ink:#6cb4ff; --accent-soft:#0f2a47; --accent-bg:#0c2038;
+  --ice:#0f2a47; --warn:#ff453a; --warn-ink:#ff6961; --warn-soft:#3a1513; --on-accent:#ffffff; --seg:rgba(255,255,255,.08); --ring:#48484a; --ok:#409cff;
+  --me:#2f5f8f; --alert:#ff453a; --ok-soft:#0f2a47; --alert-soft:#3a1513; --shadow:0 0 0 .5px rgba(255,255,255,.06); color-scheme:dark}
 /* 三个工具共用的左上角切换：点名称展开列表 */
 .appnav{position:relative;flex:none}
-.appnav summary{list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;font-size:20px;font-family:"Noto Serif SC","Songti SC",serif;font-weight:700;color:var(--ink);cursor:pointer;border-radius:8px;user-select:none}
+.appnav summary{list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 4px;font-size:20px;font-family:var(--sans);font-weight:700;color:var(--ink);cursor:pointer;border-radius:8px;user-select:none}
 .appnav summary::-webkit-details-marker{display:none}
 .appnav summary::after{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-2px) rotate(45deg);transition:transform .15s}
 .appnav[open] summary::after{transform:translateY(2px) rotate(-135deg)}
@@ -187,6 +190,25 @@ nav.tabs a.cur{color:var(--accent);font-weight:700;box-shadow:inset 0 3px 0 var(
 .ctab{width:100%;border-collapse:collapse;font-size:13px}
 .ctab th,.ctab td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line2)}
 .ctab th{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ===== 主题：Apple 风 · 天空蓝 ===== */
+body{font-family:var(--sans);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;letter-spacing:-.005em}
+h1,.appnav summary{font-family:var(--sans)!important;font-size:24px;font-weight:700;letter-spacing:-.02em}
+h2,h3{font-family:var(--sans)!important;font-weight:600;letter-spacing:-.01em}
+.card,.fold{border:none;border-radius:18px;box-shadow:var(--shadow)}
+.appmenu{border:none;border-radius:14px;box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.12)}
+.field,.osel{border-radius:10px;border-color:transparent;background:rgba(0,0,0,.04)}
+.field:focus,.osel:focus{outline:none;background:var(--card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.primary{border-radius:980px;font-weight:600}
+.newo{border:none;border-radius:980px;background:rgba(0,0,0,.05);font-weight:500}
+[hidden]{display:none!important}
+.dot.on i{background:var(--accent);border-color:var(--accent)}
+.vseg{border-radius:10px;background:var(--seg);padding:2px}
+.vseg button{border-radius:8px;font-weight:500}
+.vseg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.chips button{border:none;background:rgba(0,0,0,.05);font-weight:500;border-radius:980px}
+.chips button.on{background:var(--ink);color:var(--card)}
+.conf button{border-radius:8px}
 </style>
 </head>
 <body>

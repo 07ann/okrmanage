@@ -6,50 +6,50 @@
 <title>个人工作看板</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: 周看板（节奏条 + 统计 + 可收起的项目清单 + 四列）⇄ 日看板（🍎 计划/实际 + 今日清单 + 挑选区） */
 :root {
-  --bg: #e7ebee;
-  --surface: #f4f6f8;
+  --bg: #f5f5f7;
+  --surface: #f0f0f3;
   --card: #ffffff;
-  --ink: #1b2530;
-  --muted: #5a6874;
-  --line: #d1d8de;
-  --accent: #2e4a98;
-  --accent-soft: #e1e7f7;
-  --wait: #a86d14;
-  --wait-soft: #fbefd9;
-  --alert: #c0443a;
-  --alert-soft: #fae4e1;
-  --ok: #2b7a57;
-  --ok-soft: #dff1e8;
-  --me: #7b4ea3;
-  --me-soft: #efe5f8;
-  --todo: #6d7a86;
-  --apple: #d6453b;
-  --shadow: 0 1px 2px rgba(27, 37, 48, .08), 0 3px 10px rgba(27, 37, 48, .05);
-  --font-display: "Noto Serif SC", "Songti SC", "STSong", serif;
-  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ink: #1d1d1f;
+  --muted: #86868b;
+  --line: #e8e8ed;
+  --accent: #2e9bff;
+  --accent-soft: #e8f3ff;
+  --wait: #7cbcff;
+  --wait-soft: #eef6ff;
+  --alert: #ff3b30;
+  --alert-soft: #fff0ef;
+  --ok: #2e9bff;
+  --ok-soft: #e8f3ff;
+  --me: #a8d3ff;
+  --me-soft: #eef6ff;
+  --todo: #c7c7cc;
+  --apple: #ff3b30;
+  --shadow: 0 0 0 .5px rgba(0, 0, 0, .04), 0 2px 10px rgba(0, 0, 0, .04);
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11171c; --surface: #182026; --card: #20292f; --ink: #e5eaee; --muted: #97a4af;
-    --line: #303b44; --accent: #8fa7ee; --accent-soft: #232f4d; --wait: #e2a74b; --wait-soft: #382c19;
-    --alert: #f07b6f; --alert-soft: #3b2220; --ok: #6cc69c; --ok-soft: #1b3228; --me: #c8a4ea; --me-soft: #322549;
-    --todo: #8b98a4; --apple: #f0776c;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.25);
+    --bg: #000000; --surface: #1c1c1e; --card: #1c1c1e; --ink: #f5f5f7; --muted: #98989d;
+    --line: #2c2c2e; --accent: #409cff; --accent-soft: #0f2a47; --wait: #5a9fe0; --wait-soft: #0f2a47;
+    --alert: #ff453a; --alert-soft: #3a1513; --ok: #409cff; --ok-soft: #0f2a47; --me: #2f5f8f; --me-soft: #0f2a47;
+    --todo: #48484a; --apple: #ff453a;
+    --shadow: 0 0 0 .5px rgba(255,255,255,.06);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11171c; --surface: #182026; --card: #20292f; --ink: #e5eaee; --muted: #97a4af;
-  --line: #303b44; --accent: #8fa7ee; --accent-soft: #232f4d; --wait: #e2a74b; --wait-soft: #382c19;
-  --alert: #f07b6f; --alert-soft: #3b2220; --ok: #6cc69c; --ok-soft: #1b3228; --me: #c8a4ea; --me-soft: #322549;
-  --todo: #8b98a4; --apple: #f0776c;
-  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 3px 10px rgba(0,0,0,.25);
+  --bg: #000000; --surface: #1c1c1e; --card: #1c1c1e; --ink: #f5f5f7; --muted: #98989d;
+    --line: #2c2c2e; --accent: #409cff; --accent-soft: #0f2a47; --wait: #5a9fe0; --wait-soft: #0f2a47;
+    --alert: #ff453a; --alert-soft: #3a1513; --ok: #409cff; --ok-soft: #0f2a47; --me: #2f5f8f; --me-soft: #0f2a47;
+    --todo: #48484a; --apple: #ff453a;
+    --shadow: 0 0 0 .5px rgba(255,255,255,.06);
   color-scheme: dark;
 }
 
@@ -302,6 +302,11 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 .waitbar { height: 4px; border-radius: 2px; background: var(--wait-soft); overflow: hidden; }
 .waitbar i { display: block; height: 100%; background: var(--wait); }
 .waitbar.late i { background: var(--alert); }
+.foldbtn { border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 999px; font: inherit; font-size: 12px; padding: 2px 10px; cursor: pointer; }
+.foldbtn:hover { color: var(--accent); border-color: var(--accent); }
+.folded { display: grid; gap: 4px; text-align: left; width: 100%; border: 1px dashed var(--line); background: var(--card); border-radius: 10px; padding: 12px; font: inherit; cursor: pointer; color: var(--muted); font-size: 12px; }
+.folded b { color: var(--ok); font-size: 13px; }
+.folded span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .move { display: flex; gap: 4px; justify-content: flex-end; }
 .move button { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; font-size: 12px; padding: 1px 8px; color: var(--muted); }
 .move button:hover { color: var(--ink); border-color: var(--muted); }
@@ -543,6 +548,112 @@ h1 { font-family: var(--font-display); font-size: 28px; margin: 0; letter-spacin
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition: none !important; }
 }
+
+/* 僵尸任务卡 */
+.zcard { gap: 14px; }
+.zhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.zname { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.zn { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--alert); color: #fff; font-size: 12px; font-weight: 600; display: inline-grid; place-items: center; }
+.zprog { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.zbar { display: inline-flex; gap: 3px; }
+.zbar i { width: 14px; height: 5px; border-radius: 999px; background: var(--line); }
+.zbar i.z-do { background: var(--accent); }
+.zbar i.z-drop { background: var(--todo); }
+.zone { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border: none; border-radius: 14px; background: var(--surface); padding: 14px 16px; }
+.zinfo { display: grid; gap: 3px; min-width: 0; flex: 1 1 180px; }
+.zone .zt { font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+.zmeta { display: flex; gap: 8px; font-size: 12px; color: var(--muted); }
+.zmeta b { color: var(--alert); font-weight: 500; }
+.zacts { gap: 4px; flex: none; }
+.zacts button { border: none; border-radius: 980px; padding: 6px 14px; font-size: 13px; font-weight: 500; background: none; color: var(--muted); }
+.zacts button:hover { background: rgba(0,0,0,.05); }
+.zacts .z-go { background: var(--accent); color: #fff; }
+.zacts .z-go:hover { background: var(--accent); filter: brightness(1.06); }
+.zacts .z-del:hover { color: var(--alert); }
+.zacts .z-sure { background: var(--alert); color: #fff; }
+.zclear { color: var(--muted); padding: 2px 0; font-size: 13px; }
+.zempty .zname { color: var(--muted); }
+/* ===== 主题：Apple 风 · 天空蓝 ===== */
+body { -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; letter-spacing: -.005em; font-size: 14px; }
+.wrap { gap: 28px; padding-block: 36px 120px; }
+h1, .appnav summary { font-family: var(--font-body) !important; font-size: 28px; font-weight: 700; letter-spacing: -.02em; }
+.modal h3 { font-family: var(--font-body) !important; font-weight: 700; font-size: 19px; letter-spacing: -.01em; }
+/* 容器 */
+.weekbar, .mcard, .balance, .timebox { border: none; border-radius: 18px; box-shadow: var(--shadow); padding: 18px 20px; }
+.col { border: none; border-radius: 18px; padding: 14px; background: rgba(0,0,0,.025); gap: 12px; }
+.col-head { padding: 2px 4px 4px; }
+.col-head h2 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.col-head h2 i { width: 7px; height: 7px; }
+.card { border: none; border-radius: 14px; box-shadow: var(--shadow); padding: 14px 16px; gap: 10px; transition: transform .15s, box-shadow .15s; }
+.card .t { font-weight: 500; font-size: 15px; line-height: 1.4; }
+.card:hover { transform: translateY(-1px); box-shadow: 0 0 0 .5px rgba(0,0,0,.05), 0 6px 18px rgba(0,0,0,.07); }
+.proj { border: none; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); padding: 16px; }
+.proj-name .t { font-weight: 600; font-size: 15px; }
+.item, .pick, .subrow, .evrow { border-color: transparent; box-shadow: var(--shadow); border-radius: 12px; }
+.panel { border: none; border-radius: 18px; }
+.mlab { font-size: 13px; }
+.mlab b { font-weight: 600; color: var(--ink); }
+/* 按钮：主按钮胶囊实色，其它是浅灰填充 */
+.btn { border: none; border-radius: 980px; background: rgba(0,0,0,.05); box-shadow: none; font-weight: 500; padding: 8px 16px; color: var(--ink); }
+.btn:hover:not(:disabled) { background: rgba(0,0,0,.08); color: var(--ink); }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--accent); color: #fff; filter: brightness(1.06); }
+.btn.small { padding: 5px 12px; font-size: 13px; }
+.link { color: var(--accent); }
+/* 周条 */
+.day { border: none; border-radius: 14px; background: var(--surface); padding: 10px 12px; }
+.day:hover { box-shadow: inset 0 0 0 1px var(--accent-soft); }
+.day .dn { font-size: 12px; }
+.day .dd { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+.day.today { background: var(--accent-soft); box-shadow: none; }
+.day.today .dn, .day.today .dd { color: var(--accent); }
+.minibars { border-bottom: none; }
+.minibars span { border-radius: 4px; }
+.minibars .b-plan { background: var(--me); }
+.minibars .b-done { background: var(--accent); }
+.minibars .b-zero { background: var(--line); }
+/* 分段控件：iOS 样式 */
+.seg { border: none; border-radius: 10px; background: rgba(0,0,0,.05); padding: 2px; }
+.seg button { border-radius: 8px; font-weight: 500; padding: 5px 16px; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.mtabs button { border: none; background: rgba(0,0,0,.05); font-weight: 500; box-shadow: none; }
+.mtabs button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+.pill { border: none; background: transparent; color: var(--muted); font-weight: 500; }
+/* 标签 */
+.chip, .chip.work, .chip.me, .chip.easy, .chip.hard, .chip.unplanned, .chip.ddl, .chip.ok { background: rgba(0,0,0,.04); color: var(--muted); font-weight: 500; padding: 2px 8px; border: none; font-size: 12px; }
+.chip.wait { background: var(--accent-soft); color: var(--accent); }
+.chip.late { background: var(--alert); color: #fff; }
+.chip.zombie, .chip.stale { background: var(--alert-soft); color: var(--alert); }
+.cdot { width: 7px; height: 7px; }
+.cdot.work { background: var(--accent); }
+.cdot.me { background: none; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.move button, .abtn, .limitbtns button, .iconbtn, .foldbtn { border: none; background: none; color: var(--muted); font-weight: 500; border-radius: 980px; }
+.move button:hover, .abtn:hover, .foldbtn:hover { background: var(--accent-soft); color: var(--accent); }
+.modal { border-radius: 22px; padding: 24px; }
+.field > span { font-size: 13px; color: var(--muted); font-weight: 500; }
+.field input:not([type="radio"]):not([type="checkbox"]), .field textarea, .field select, .quick input[type="text"], .quick select, #syncToken { border-radius: 10px; border-color: transparent; background: rgba(0,0,0,.04); }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; background: var(--card); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.daysel { border: none; background: none; color: var(--muted); padding: 0; width: auto; }
+.daysel.set { background: var(--accent-soft); color: var(--accent); padding: 1px 8px; }
+.daysel.today { background: var(--accent); color: #fff; }
+.slots span { border-radius: 999px; height: 6px; border-width: 1px; }
+.segbar span { border-radius: 999px; height: 5px; }
+.appmenu { border: none; border-radius: 14px; box-shadow: 0 0 0 .5px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.12); backdrop-filter: blur(20px); }
+.folded { border: none; background: var(--card); box-shadow: var(--shadow); }
+.folded b { color: var(--ink); font-weight: 600; }
+.col.c-done .card { opacity: .6; box-shadow: none; }
+.col.c-done .card .t span { text-decoration: line-through; text-decoration-color: var(--muted); }
+.waitbar { border-radius: 999px; }
+.waitbar i { background: var(--wait); }
+.waitbar.late i { background: var(--alert); }
+.pick.easy { border: none; background: var(--card); }
+.pick.easy .plus { color: var(--accent); }
+.pcount { font-size: 12px; color: var(--muted); }
+.zone { background: var(--surface); border-radius: 14px; }
+.zn { background: var(--alert); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn, :root:not([data-theme="light"]) .seg, :root:not([data-theme="light"]) .mtabs button, :root:not([data-theme="light"]) .chip { background: rgba(255,255,255,.08); }
+  :root:not([data-theme="light"]) .col { background: rgba(255,255,255,.03); } }
+:root[data-theme="dark"] .btn, :root[data-theme="dark"] .seg, :root[data-theme="dark"] .chip { background: rgba(255,255,255,.08); }
 </style>
 </head>
 <body>
@@ -1253,8 +1364,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function inCol(col) { return state.cards.filter(function (c) { return c.col === col; }); }
   function catChip(cat) { return h('span', { class: 'chip ' + (cat === '个人' ? 'me' : 'work'), text: cat }); }
   function diffChip(c) {
-    if (c.diff === 'easy') return h('span', { class: 'chip easy', text: '⚡ 简单' });
-    if (c.diff === 'hard') return h('span', { class: 'chip hard', text: '启动 ×' + c.sessions.length });
+    if (c.diff === 'easy') return h('span', { class: 'chip easy', title: '简单任务', text: '⚡' });
+    if (c.diff === 'hard') return null;
     return null;
   }
   function planOf(d) { return state.plans[d] || []; }
@@ -1438,7 +1549,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function daySelect(current, onPick, label) {
     var todayS = ymd(Date.now());
     var sel = h('select', { class: 'daysel' + (current ? ' set' : '') + (current === todayS ? ' today' : ''), 'aria-label': label || '安排在哪天', title: '安排在这周哪一天' });
-    sel.appendChild(h('option', { value: '', text: current ? '取消安排' : '安排到…' }));
+    sel.appendChild(h('option', { value: '', text: current ? '取消安排' : '＋ 安排' }));
     curWeek.forEach(function (d) {
       var s = ymd(d);
       sel.appendChild(h('option', { value: s, text: '周' + WD[wdIndex(d)] + ' ' + md(d) + (s === todayS ? '（今天）' : '') }));
@@ -1478,12 +1589,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       else if (cardDdl(c)) m.appendChild(ddlChip({ ddl: cardDdl(c) }, true));
       if (od) {} else if (mdays >= ZOMBIE_DAYS) m.appendChild(h('span', { class: 'chip zombie', text: '僵尸 · ' + mdays + ' 天' }));
       else if (mdays >= STALE_DAYS) m.appendChild(h('span', { class: 'chip stale', text: mdays + ' 天没动' }));
-      age = h('span', { class: 'age', text: mdays + ' 天' });
+      age = null;
     }
-    m.appendChild(age); d.appendChild(m);
+    if (age) m.appendChild(age); d.appendChild(m);
     if (extra) d.appendChild(extra);
     var mv = h('div', { class: 'move' }), i = ORDER.indexOf(c.col);
-    if (i > 0) mv.appendChild(h('button', { type: 'button', text: '‹ ' + COLS[i - 1].name, onclick: function () { moveCard(c.id, ORDER[i - 1]); } }));
     if (i < ORDER.length - 1) mv.appendChild(h('button', { type: 'button', text: COLS[i + 1].name + ' ›', onclick: function () { moveCard(c.id, ORDER[i + 1]); } }));
     d.appendChild(mv);
     d.addEventListener('dragstart', function (e) { e.dataTransfer.setData('application/x-card', c.id); e.dataTransfer.setData('text/plain', c.id); e.dataTransfer.effectAllowed = 'move'; d.classList.add('dragging'); });
@@ -1505,8 +1615,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   }
   function projectEl(p) {
     var pr = progress(p);
-    var color = p.cat === '个人' ? 'var(--me)' : 'var(--accent)';
-    if (pr.total && pr.done === pr.total) color = 'var(--ok)';
+    var color = 'var(--accent)';
     var linked = state.cards.filter(function (c) { return c.projectId === p.id; });
     var starts = linked.reduce(function (a, c) { return a + c.sessions.length; }, 0);
     var rb = h('div', { class: 'ringbox' }, [h('span', { class: 'pct', text: pr.total ? Math.round(pr.pct * 100) + '%' : '–' })]);
@@ -1548,14 +1657,13 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
     var el = h('div', { class: 'proj' }, [
       h('div', { class: 'proj-top' }, [h('span', { class: 'grip', title: '拖动排序', text: '⋮⋮' }), rb, h('div', { class: 'proj-name' }, [
         h('button', { type: 'button', class: 't', text: p.name, title: p.okr ? '去 OKR 登记' : null, onclick: function () { if (p.okr) location.href = 'okr-log.html'; else openProject(p.id); } }),
-        h('div', { class: 'meta' }, [catChip(p.cat), ddlChip(p),
-          h('span', { class: 'chip' + (pr.total && pr.done === pr.total ? ' ok' : ''), text: pr.total ? pr.unit + ' ' + pr.done + '/' + pr.total : '还没有子项目' })])
+        h('div', { class: 'meta' }, [ddlChip(p),
+          h('span', { class: 'pcount', text: pr.total ? pr.done + ' / ' + pr.total : '还没有子项目' })])
       ])]),
       p.subs.length ? seg : null,
       p.subs.length ? subl : null,
       h('div', { class: 'proj-foot' }, [
         p.subs.length > 8 ? h('span', { text: '还有 ' + (p.subs.length - 8) + ' 项' }) : null,
-        starts ? h('span', { text: '已启动 ' + starts + ' 次' }) : null,
         p.okr ? h('a', { class: 'link', href: 'okr-log.html', text: '去登记 ›' }) : null,
         p.okr ? h('a', { class: 'link', href: 'okr-shatter.html', text: '改计划' }) : h('button', { type: 'button', class: 'link', text: '编辑', onclick: function () { openProject(p.id); } })
       ])
@@ -1578,27 +1686,29 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function zombieCard(ws, we) {
     var zs = state.cards.filter(function (c) { return passCat(c) && isZombie(c); }).sort(function (a, b) { return (cardOverdue(b) - cardOverdue(a)) || (lastAct(a) - lastAct(b)); });
     var log = state.zlog.filter(function (z) { return z.ts >= ws && z.ts < we; });
-    var mx = h('div', { class: 'mx', 'aria-label': '本周处理 ' + log.length + ' 件，还剩 ' + zs.length + ' 件' });
-    log.slice(-20).forEach(function (z) { mx.appendChild(h('i', { class: z.kind === 'do' ? 'z-do' : 'z-drop', title: (z.kind === 'do' ? '做了十分钟：' : '放弃：') + z.title })); });
-    zs.slice(0, 20).forEach(function () { mx.appendChild(h('i', { class: 'z-left' })); });
+    var tot = log.length + zs.length;
+    var zbar = h('span', { class: 'zbar', 'aria-label': '本周处理 ' + log.length + ' 件，还剩 ' + zs.length + ' 件' });
+    log.slice(-12).forEach(function (z) { zbar.appendChild(h('i', { class: z.kind === 'do' ? 'z-do' : 'z-drop', title: (z.kind === 'do' ? '做了十分钟：' : '放弃：') + z.title })); });
+    zs.slice(0, Math.max(0, 12 - Math.min(12, log.length))).forEach(function () { zbar.appendChild(h('i')); });
     var body;
     if (!zs.length) {
       body = h('div', { class: 'zclear', text: log.length ? '清空了，本周处理掉 ' + log.length + ' 件' : '没有僵尸任务' });
     } else {
       var c = zs[0], p = c.projectId && findProj(c.projectId);
-      var one = h('div', { class: 'zone' }, [
+      var one = h('div', { class: 'zone' }, [h('div', { class: 'zinfo' }, [
         h('div', { class: 'zt', text: c.title }),
-        h('div', { class: 'meta' }, [h('span', { class: 'zage', text: cardOverdue(c) ? '超过 DDL ' + cardOverdue(c) + ' 天' : daysSince(lastAct(c)) + ' 天没动' }), catChip(c.cat), p ? h('span', { class: 'chip', text: '▸ ' + p.name }) : null])
-      ]);
+        h('div', { class: 'zmeta' }, [h('b', { text: cardOverdue(c) ? '超 DDL ' + cardOverdue(c) + ' 天' : daysSince(lastAct(c)) + ' 天没动' }),
+          h('span', { text: p ? p.name : c.cat })])
+      ])]);
       var acts = h('div', { class: 'zacts' });
       if (zConfirm === c.id) {
-        acts.appendChild(h('button', { type: 'button', class: 'z-del', text: '确认放弃', onclick: function () {
+        acts.appendChild(h('button', { type: 'button', class: 'z-sure', text: '确认放弃', onclick: function () {
           one.classList.add('out'); zConfirm = null;
           setTimeout(function () { state.zlog.push({ ts: Date.now(), kind: 'drop', title: c.title }); dropCard(c.id); save(); render(); toast('已放弃“' + c.title + '”'); }, reduceMotion ? 0 : 240);
         } }));
         acts.appendChild(h('button', { type: 'button', text: '再想想', onclick: function () { zConfirm = null; render(); } }));
       } else {
-        acts.appendChild(h('button', { type: 'button', class: 'z-go', text: '▶ 做十分钟', onclick: function () {
+        acts.appendChild(h('button', { type: 'button', class: 'z-go', text: '▶ 做 10 分钟', onclick: function () {
           if (state.timer) { toast('已经有一个计时在进行，先结束它'); return; }
           one.classList.add('out');
           setTimeout(function () { state.zlog.push({ ts: Date.now(), kind: 'do', title: c.title }); if (startTimer(c.id, 10, true)) toast('开始十分钟：' + c.title); }, reduceMotion ? 0 : 240);
@@ -1608,9 +1718,12 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       one.appendChild(acts);
       body = one;
     }
-    return h('section', { class: 'mcard zcard' }, [
-      h('div', { class: 'mlab' }, [h('b', null, [h('i', { style: 'background:var(--alert)' }), '僵尸任务']), h('span', { text: zs.length ? '还剩 ' + zs.length + ' 件' : '' })]),
-      h('div', { class: 'zbody' }, [mx, body])
+    return h('section', { class: 'mcard zcard' + (zs.length ? '' : ' zempty') }, [
+      h('div', { class: 'zhead' }, [
+        h('b', { class: 'zname' }, ['僵尸任务', zs.length ? h('span', { class: 'zn', text: String(zs.length) }) : null]),
+        tot ? h('span', { class: 'zprog' }, [h('span', { text: '本周处理 ' + log.length + ' / ' + tot }), zbar]) : null
+      ]),
+      body
     ]);
   }
   function dropCard(id) {
@@ -1716,7 +1829,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       h('span', { class: 'range', text: md(days[0]) + ' – ' + md(days[6]) }),
       weekOffset === 0 ? h('span', { class: 'tag', text: '本周' }) : h('button', { class: 'link', type: 'button', text: '回到本周', onclick: function () { weekOffset = 0; render(); } }),
       h('button', { class: 'btn small', type: 'button', text: '下周 ›', onclick: function () { weekOffset++; render(); } }),
-      h('span', { class: 'legend' }, [h('span', null, [h('i', { style: 'background:var(--ok)' }), '完成']), h('span', null, [h('i', { style: 'background:var(--accent)' }), '安排'])])
+      h('span', { class: 'legend' }, [h('span', null, [h('i', { style: 'background:var(--accent)' }), '完成']), h('span', null, [h('i', { style: 'background:var(--me)' }), '安排'])])
     ]);
     var strip = h('div', { class: 'days' });
     perDay.forEach(function (x) {
@@ -1725,7 +1838,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
         title: x.titles.length ? x.titles.join('\n') + (x.planned > 3 ? '\n…' : '') : '还没安排', 'aria-label': '打开 ' + md(x.d) + ' 日看板，已安排 ' + x.planned + ' 件' }, [
         h('span', { class: 'dtop' }, [h('span', { class: 'dn', text: x.s === todayS && isMobile() ? '今天' : '周' + WD[wdIndex(x.d)] + (x.s === todayS ? ' · 今天' : '') }), h('span', { class: 'dd', text: md(x.d) })]),
         h('span', { class: 'minibars', 'aria-hidden': 'true' }, [bar(x.planned, 'b-plan'), bar(x.done, 'b-done')]),
-        h('span', { class: 'dm', text: x.planned ? '安排 ' + x.planned + ' · ✓' + x.done : '未安排' }),
+        h('span', { class: 'dm', text: x.planned ? x.done + ' / ' + x.planned : '' }),
         (state.events[x.s] || []).length ? h('span', { class: 'devline', text: evLabel(sortedEv(x.s)[0]) + ((state.events[x.s].length > 1) ? ' +' + (state.events[x.s].length - 1) : '') }) : null
       ]);
       cell.addEventListener('dragover', function (e) { if (!hasType(e, 'application/x-card')) return; e.preventDefault(); cell.classList.add('over'); });
@@ -1758,7 +1871,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       list.sort(function (a, b) { return (b.col === 'done') - (a.col === 'done'); });
       var m = list.length ? matrix(list.length, done, cat === '个人' ? 'f-me' : 'f-work') : h('div', { class: 'unit', text: '本周还没安排' });
       return h('section', { class: 'mcard', 'aria-label': cat + '：完成 ' + done + ' 件，目标 ' + list.length + ' 件' }, [
-        h('div', { class: 'mlab' }, [h('b', null, [h('i', { style: 'background:' + (cat === '个人' ? 'var(--me)' : 'var(--accent)') }), cat]), h('span', { text: '目标 ' + list.length })]),
+        h('div', { class: 'mlab' }, [h('b', null, [h('i', { class: 'cdot ' + (cat === '个人' ? 'me' : 'work') }), cat]), h('span', { text: '目标 ' + list.length })]),
         h('div', { class: 'mbig' }, [String(done), h('small', { text: ' / ' + list.length + ' 件' })]),
         m
       ]);
@@ -1825,7 +1938,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       else if (col.id === 'done') list.sort(function (a, b) { return (b.doneAt || 0) - (a.doneAt || 0); });
       else list.sort(function (a, b) { return a.moved - b.moved; });
 
-      var sec = h('section', { class: 'col' + (mobileCol === col.id ? ' mactive' : '') });
+      var sec = h('section', { class: 'col c-' + col.id + (mobileCol === col.id ? ' mactive' : '') });
       var head = h('div', { class: 'col-head' }, [h('h2', null, [h('i', { style: 'background:' + col.color }), col.name])]);
       if (col.id === 'doing') {
         var allDoing = inCol('doing');
@@ -1850,11 +1963,18 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
         }
         sec.appendChild(slots);
       } else {
-        head.appendChild(h('span', { class: 'pill', text: String(list.length) }));
+        var hr = h('span', { class: 'actions', style: 'gap:6px' }, [h('span', { class: 'pill', text: String(list.length) })]);
+        if (col.id === 'done' && list.length) hr.appendChild(h('button', { type: 'button', class: 'foldbtn', 'aria-expanded': state.doneFold ? 'false' : 'true',
+          text: state.doneFold ? '展开' : '收起', onclick: function () { state.doneFold = !state.doneFold; save(); render(); } }));
+        head.appendChild(hr);
         sec.appendChild(head);
       }
       var cards = h('div', { class: 'cards' });
-      if (!list.length) cards.appendChild(h('div', { class: 'empty', text: col.id === 'todo' ? '点“新建任务”加第一件事' : '把卡片拖到这里' }));
+      if (col.id === 'done' && state.doneFold && list.length) {
+        cards.appendChild(h('button', { type: 'button', class: 'folded', onclick: function () { state.doneFold = false; save(); render(); } },
+          [h('b', { text: '✓ 本周已完成 ' + list.length + ' 件' }), h('span', { text: list.slice(0, 3).map(function (c) { return c.title; }).join('、') + (list.length > 3 ? ' 等' : '') })]));
+        list = [];
+      } else if (!list.length) cards.appendChild(h('div', { class: 'empty', text: col.id === 'todo' ? '点“新建任务”加第一件事' : '把卡片拖到这里' }));
       list.forEach(function (c) { cards.appendChild(cardEl(c)); });
       sec.appendChild(cards);
       sec.addEventListener('dragover', function (e) { if (!hasType(e, 'application/x-card')) return; e.preventDefault(); sec.classList.add('over'); });
