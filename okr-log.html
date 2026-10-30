@@ -227,6 +227,72 @@ h2,h3{font-family:var(--sans)!important;font-weight:600;letter-spacing:-.01em}
 </div>
 
 <script>
+/* OKR 云同步：碎冰台计划（okr-plan）和登记记录（okr-log）存进看板用的同一个私密 Gist。
+   密钥沿用看板“同步”里连接过的那个（同一浏览器、同一网址下自动共用）。哪边更新就用哪边；空数据永远不会覆盖有内容的数据。 */
+window.OkrSync = (function () {
+  var CFG = 'personal-kanban-gist', GH = 'https://api.github.com';
+  var KEYS = ['okr-plan', 'okr-log'], FILE = { 'okr-plan': 'okr-plan.json', 'okr-log': 'okr-log.json' };
+  function cfg() { try { var c = JSON.parse(localStorage.getItem(CFG) || 'null'); return c && c.token && c.id ? c : null; } catch (e) { return null; } }
+  function rd(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function empty(k, o) {
+    if (!o || typeof o !== 'object') return true;
+    if (k === 'okr-plan') return !((o.objectives || []).some(function (x) { return x.title && String(x.title).trim(); }) || (o.krs || []).length || (o.actions || []).length);
+    return !((o.checks || []).length || (o.reviews || []).length);
+  }
+  function ts(o) { return o && o.updatedAt ? (Date.parse(o.updatedAt) || 0) : 0; }
+  function gh(c, path, opt) {
+    opt = opt || {};
+    return fetch(GH + path, { method: opt.method || 'GET', cache: 'no-store',
+      headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + c.token, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
+      body: opt.body ? JSON.stringify(opt.body) : undefined
+    }).then(function (r) { if (!r.ok) { var e = new Error('GitHub ' + r.status); e.status = r.status; throw e; } return r.json(); });
+  }
+  function fileData(f) {
+    if (!f) return Promise.resolve(null);
+    var p = f.truncated ? fetch(f.raw_url, { cache: 'no-store' }).then(function (r) { return r.text(); }) : Promise.resolve(f.content);
+    return p.then(function (t) { try { return JSON.parse(t); } catch (e) { return null; } });
+  }
+  var busy = null, again = false, timer = null, status = 'local';
+  function setStatus(s) { status = s; try { window.dispatchEvent(new CustomEvent('okrsync-status', { detail: s })); } catch (e) {} }
+  /* 拉取 + 合并 + 把本机更新的部分推上去；返回本机被更新的 key 列表 */
+  function sync() {
+    var c = cfg(); if (!c) { setStatus('local'); return Promise.resolve([]); }
+    if (busy) { again = true; return busy; }
+    setStatus('syncing');
+    busy = gh(c, '/gists/' + c.id).then(function (g) {
+      var files = (g && g.files) || {};
+      return Promise.all(KEYS.map(function (k) { return fileData(files[FILE[k]]); })).then(function (remotes) {
+        var changed = [], up = {};
+        KEYS.forEach(function (k, i) {
+          var r = remotes[i], l = rd(k), re = empty(k, r), le = empty(k, l);
+          if (!re && (le || ts(r) > ts(l))) { localStorage.setItem(k, JSON.stringify(r)); changed.push(k); }
+          else if (!le && (re || ts(l) > ts(r))) { if (!l.updatedAt) l.updatedAt = new Date().toISOString(); up[FILE[k]] = { content: JSON.stringify(l) }; }
+        });
+        var p = Object.keys(up).length ? gh(c, '/gists/' + c.id, { method: 'PATCH', body: { files: up } }) : Promise.resolve();
+        return p.then(function () { return changed; });
+      });
+    }).then(function (changed) {
+      setStatus('ok');
+      if (changed.length) try { window.dispatchEvent(new CustomEvent('okrsync', { detail: changed })); } catch (e) {}
+      return changed;
+    }, function (e) { setStatus('error'); return []; }).then(function (changed) {
+      busy = null;
+      if (again) { again = false; setTimeout(sync, 300); }
+      return changed;
+    });
+    return busy;
+  }
+  function queue() { if (!cfg()) return; clearTimeout(timer); timer = setTimeout(sync, 1500); }
+  function start() {
+    if (!cfg()) return;
+    sync();
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') sync(); });
+    setInterval(function () { if (document.visibilityState === 'visible') sync(); }, 60000);
+  }
+  return { sync: sync, queue: queue, start: start, connected: function () { return !!cfg(); }, status: function () { return status; } };
+})();
+</script>
+<script>
 document.addEventListener('click',function(e){document.querySelectorAll('details.appnav[open]').forEach(function(d){if(!d.contains(e.target))d.removeAttribute('open')})});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('details.appnav[open]').forEach(function(d){d.removeAttribute('open')})});
 /* 读 okr-plan（碎冰台写），写 okr-log：
@@ -248,7 +314,7 @@ const today=()=>ymd(new Date());
 let P=load(PK)||{objectives:[],krs:[],actions:[]};
 let L=load(LK)||{}; if(!Array.isArray(L.checks))L.checks=[]; if(!Array.isArray(L.reviews))L.reviews=[];
 let D=today();
-const save=()=>{L.updatedAt=new Date().toISOString();store(LK,L)};
+const save=()=>{L.updatedAt=new Date().toISOString();store(LK,L);OkrSync.queue()};
 
 /* 清掉找不到对应行动的打卡记录（碎冰台里删除了的） */
 (function cleanup(){
@@ -540,6 +606,8 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview()});
 /* 另一个页面（碎冰台）改了计划，回到这里时刷新 */
+window.addEventListener('okrsync',()=>{P=load(PK)||P;L=load(LK)||L;if(!Array.isArray(L.checks))L.checks=[];if(!Array.isArray(L.reviews))L.reviews=[];render()});
+OkrSync.start();
 window.addEventListener('storage',e=>{if(e.key===PK)P=load(PK)||P;if(e.key===LK)L=load(LK)||L;render()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){P=load(PK)||P;const t=today();if(D>t)D=t;render()}});
 setView(V);

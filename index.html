@@ -780,6 +780,72 @@ h1, .appnav summary { font-family: var(--font-body) !important; font-size: 28px;
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
+/* OKR 云同步：碎冰台计划（okr-plan）和登记记录（okr-log）存进看板用的同一个私密 Gist。
+   密钥沿用看板“同步”里连接过的那个（同一浏览器、同一网址下自动共用）。哪边更新就用哪边；空数据永远不会覆盖有内容的数据。 */
+window.OkrSync = (function () {
+  var CFG = 'personal-kanban-gist', GH = 'https://api.github.com';
+  var KEYS = ['okr-plan', 'okr-log'], FILE = { 'okr-plan': 'okr-plan.json', 'okr-log': 'okr-log.json' };
+  function cfg() { try { var c = JSON.parse(localStorage.getItem(CFG) || 'null'); return c && c.token && c.id ? c : null; } catch (e) { return null; } }
+  function rd(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function empty(k, o) {
+    if (!o || typeof o !== 'object') return true;
+    if (k === 'okr-plan') return !((o.objectives || []).some(function (x) { return x.title && String(x.title).trim(); }) || (o.krs || []).length || (o.actions || []).length);
+    return !((o.checks || []).length || (o.reviews || []).length);
+  }
+  function ts(o) { return o && o.updatedAt ? (Date.parse(o.updatedAt) || 0) : 0; }
+  function gh(c, path, opt) {
+    opt = opt || {};
+    return fetch(GH + path, { method: opt.method || 'GET', cache: 'no-store',
+      headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + c.token, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
+      body: opt.body ? JSON.stringify(opt.body) : undefined
+    }).then(function (r) { if (!r.ok) { var e = new Error('GitHub ' + r.status); e.status = r.status; throw e; } return r.json(); });
+  }
+  function fileData(f) {
+    if (!f) return Promise.resolve(null);
+    var p = f.truncated ? fetch(f.raw_url, { cache: 'no-store' }).then(function (r) { return r.text(); }) : Promise.resolve(f.content);
+    return p.then(function (t) { try { return JSON.parse(t); } catch (e) { return null; } });
+  }
+  var busy = null, again = false, timer = null, status = 'local';
+  function setStatus(s) { status = s; try { window.dispatchEvent(new CustomEvent('okrsync-status', { detail: s })); } catch (e) {} }
+  /* 拉取 + 合并 + 把本机更新的部分推上去；返回本机被更新的 key 列表 */
+  function sync() {
+    var c = cfg(); if (!c) { setStatus('local'); return Promise.resolve([]); }
+    if (busy) { again = true; return busy; }
+    setStatus('syncing');
+    busy = gh(c, '/gists/' + c.id).then(function (g) {
+      var files = (g && g.files) || {};
+      return Promise.all(KEYS.map(function (k) { return fileData(files[FILE[k]]); })).then(function (remotes) {
+        var changed = [], up = {};
+        KEYS.forEach(function (k, i) {
+          var r = remotes[i], l = rd(k), re = empty(k, r), le = empty(k, l);
+          if (!re && (le || ts(r) > ts(l))) { localStorage.setItem(k, JSON.stringify(r)); changed.push(k); }
+          else if (!le && (re || ts(l) > ts(r))) { if (!l.updatedAt) l.updatedAt = new Date().toISOString(); up[FILE[k]] = { content: JSON.stringify(l) }; }
+        });
+        var p = Object.keys(up).length ? gh(c, '/gists/' + c.id, { method: 'PATCH', body: { files: up } }) : Promise.resolve();
+        return p.then(function () { return changed; });
+      });
+    }).then(function (changed) {
+      setStatus('ok');
+      if (changed.length) try { window.dispatchEvent(new CustomEvent('okrsync', { detail: changed })); } catch (e) {}
+      return changed;
+    }, function (e) { setStatus('error'); return []; }).then(function (changed) {
+      busy = null;
+      if (again) { again = false; setTimeout(sync, 300); }
+      return changed;
+    });
+    return busy;
+  }
+  function queue() { if (!cfg()) return; clearTimeout(timer); timer = setTimeout(sync, 1500); }
+  function start() {
+    if (!cfg()) return;
+    sync();
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') sync(); });
+    setInterval(function () { if (document.visibilityState === 'visible') sync(); }, 60000);
+  }
+  return { sync: sync, queue: queue, start: start, connected: function () { return !!cfg(); }, status: function () { return status; } };
+})();
+</script>
+<script>
 document.addEventListener('click',function(e){document.querySelectorAll('details.appnav[open]').forEach(function(d){if(!d.contains(e.target))d.removeAttribute('open')})});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('details.appnav[open]').forEach(function(d){d.removeAttribute('open')})});
 (function () {
@@ -1002,6 +1068,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function okrBridge() {
     var plan = okrRead(OKR_PLAN);
     if (!plan || !Array.isArray(plan.objectives) || !Array.isArray(plan.krs) || !Array.isArray(plan.actions)) return false;
+    if (!plan.objectives.some(function (o) { return o.title && String(o.title).trim(); }) && !plan.krs.length && !plan.actions.length) return false;
     var before = JSON.stringify([state.projects, state.cards, state.okrMade]);
     var log = okrRead(OKR_LOG) || {}; if (!Array.isArray(log.checks)) log.checks = []; if (!Array.isArray(log.reviews)) log.reviews = [];
     var logChanged = false, today = ymd(Date.now());
@@ -1132,11 +1199,12 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       okrDropPlans(c.id); return false;
     });
 
-    if (logChanged) { log.updatedAt = new Date().toISOString(); try { localStorage.setItem(OKR_LOG, JSON.stringify(log)); } catch (e) {} }
+    if (logChanged) { log.updatedAt = new Date().toISOString(); try { localStorage.setItem(OKR_LOG, JSON.stringify(log)); } catch (e) {} if (window.OkrSync) OkrSync.queue(); }
     return JSON.stringify([state.projects, state.cards, state.okrMade]) !== before;
   }
   function okrRefresh() { if (okrBridge()) { saveCore(); render(); } }
   window.addEventListener('storage', function (e) { if (e.key === OKR_PLAN || e.key === OKR_LOG) okrRefresh(); });
+  window.addEventListener('okrsync', function () { if (okrBridge()) saveCore(); render(); });
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') okrRefresh(); });
   setInterval(function () { if (ymd(Date.now()) !== okrLastDay) okrRefresh(); }, 60000);
 
@@ -1232,7 +1300,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       if (r.remote && !state.sample) { syncUI.step = 'choose'; syncUI.remote = r.remote; syncUI.cfg = cfg; renderSync(); return; }
       saveGistCfg(cfg); useGist(cfg);
       if (r.remote) adoptRemote(r.remote);
-      cloud.lastSync = Date.now(); syncUI.step = 'idle'; setSync('ok'); renderSync();
+      cloud.lastSync = Date.now(); syncUI.step = 'idle'; setSync('ok'); renderSync(); if (window.OkrSync) OkrSync.sync();
       toast(r.remote ? '已连接，读取了 GitHub 上的数据' : '已连接，数据已保存到 GitHub');
     }).catch(function (e) {
       syncUI.step = 'idle';
@@ -1242,7 +1310,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   }
   function finishChoice(useRemote) {
     var cfg = syncUI.cfg, d = syncUI.remote;
-    saveGistCfg(cfg); useGist(cfg);
+    saveGistCfg(cfg); useGist(cfg); if (window.OkrSync) OkrSync.sync();
     syncUI.step = 'idle'; syncUI.remote = null; syncUI.cfg = null;
     if (useRemote) { adoptRemote(d); cloud.lastSync = Date.now(); setSync('ok'); toast('已换成 GitHub 上的数据'); }
     else { state.savedAt = Date.now(); pushCloud(); toast('已用这台设备的数据覆盖 GitHub'); }
@@ -1267,7 +1335,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
         h('span', { text: '上次同步：' + fmtTime(cloud.lastSync) }),
         h('span', null, ['数据位置：', h('a', { href: 'https://gist.github.com/' + (cfg.id || ''), target: '_blank', rel: 'noopener', text: '我的私密 Gist' })])
       ]));
-      box.appendChild(h('p', { class: 'sub', style: 'margin:0', text: '改动约 2 秒后自动上传；打开页面、切回页面时自动拉取另一台设备的改动。要在手机上使用，打开同一网址，点“同步”，粘贴同一个密钥即可。' }));
+      box.appendChild(h('p', { class: 'sub', style: 'margin:0', text: '改动约 2 秒后自动上传；打开页面、切回页面时自动拉取另一台设备的改动。要在手机上使用，打开同一网址，点“同步”，粘贴同一个密钥即可。碎冰台和登记的数据也会一起同步。' }));
       if (syncUI.confirmOff) {
         foot.appendChild(h('span', { class: 'sub', style: 'margin:0', text: '断开后这台设备不再同步，本机数据保留。' }));
         foot.appendChild(h('button', { type: 'button', class: 'btn danger', text: '确认断开', onclick: function () { saveGistCfg(null); cloud.ref = null; cloud.kind = ''; syncUI.confirmOff = false; setSync('local'); renderSync(); } }));
@@ -1275,7 +1343,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
       } else {
         foot.appendChild(h('button', { type: 'button', class: 'btn danger', text: '断开连接', onclick: function () { syncUI.confirmOff = true; renderSync(); } }));
         foot.appendChild(h('span', { class: 'spacer' }));
-        foot.appendChild(h('button', { type: 'button', class: 'btn', text: '立即同步', onclick: function () { setSync('syncing'); pullCloud(false); } }));
+        foot.appendChild(h('button', { type: 'button', class: 'btn', text: '立即同步', onclick: function () { setSync('syncing'); pullCloud(false); if (window.OkrSync) OkrSync.sync(); } }));
       }
     } else {
       box.appendChild(h('ol', { class: 'steps' }, [
@@ -1309,6 +1377,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
         });
       }).catch(function () { tryGist(); });
     } else tryGist();
+    if (window.OkrSync) OkrSync.start();
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'visible' && cloud.ref && !cloud.busy && cloud.status !== 'syncing') pullCloud(false);
     });
